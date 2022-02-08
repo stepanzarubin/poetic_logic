@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:poetic_logic/screens/form.dart';
 import 'package:poetic_logic/screens/help.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
+import 'package:poetic_logic/screens/settings.dart';
 import 'package:poetic_logic/widgets/user_poetic_list.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../main.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({
@@ -21,15 +24,24 @@ class HomeDrawer extends StatelessWidget {
           child: ListView(
             //padding: EdgeInsets.zero,
             children: <Widget>[
-              const SizedBox(
-                height: 60,
+              SizedBox(
+                height: 85,
                 child: DrawerHeader(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       //color: Colors.brown,
                       ),
-                  child: Text(
-                    'Menu',
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.account_box),
+                      FittedBox(
+                        child: Text(
+                          AppSetting.of(context).data.getSignature(),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -60,9 +72,10 @@ class HomeDrawer extends StatelessWidget {
                 title: Text('Examples'),
               ),
               const Divider(),
-              const ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+                onTap: () => Navigator.pushNamed(context, Settings.routeName),
               ),
               ListTile(
                 leading: const Icon(Icons.help),

@@ -44,6 +44,12 @@ class User {
   Map<String, dynamic> toJson() => _$UserToJson(this);
 }
 
+abstract class HasUser {
+  String getSignature() {
+    return User.oneOfPeople;
+  }
+}
+
 /// Quote (I could have single String for (Holy Bible, .. : 3:28)
 /// reason - standard, people don't know how to format/quote
 @JsonSerializable()
@@ -78,7 +84,7 @@ class Quote {
 
 /// Reworked PoeticLogic
 @JsonSerializable(explicitToJson: true)
-class AddedLogic {
+class AddedLogic extends HasUser {
   List<String> thenLogic = [];
   User? user;
 
@@ -87,9 +93,10 @@ class AddedLogic {
     this.user,
   });
 
+  @override
   String getSignature() {
     if (user == null) {
-      return 'one of people';
+      return User.oneOfPeople;
     } else {
       return user!.getSignature();
     }
@@ -102,7 +109,7 @@ class AddedLogic {
 
 /// Poetic itself is If-then combination
 @JsonSerializable(explicitToJson: true)
-class Poetic {
+class Poetic extends HasUser {
   //@JsonKey(ignore: true)
   dynamic dbKey;
 
@@ -129,9 +136,10 @@ class Poetic {
     thenLogic = ['Then logic constructor body.'];
   }
 
+  @override
   String getSignature() {
     if (user == null) {
-      return 'one of people';
+      return User.oneOfPeople;
     } else {
       return user!.getSignature();
     }

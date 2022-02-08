@@ -149,9 +149,6 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                   formModel.thenLogic[index] = value;
                 }
               },
-              style: const TextStyle(
-                fontSize: 14, //todo relative font sizes
-              ),
             ),
           ),
           if (index != (formModel.thenLogic.length - 1))
@@ -512,14 +509,9 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                   ],
                 ),
               ),
-
-              const Text(
+              Text(
                 '* required fields',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
+                style: Theme.of(context).textTheme.caption,
               ),
 
               /// clean, show example, preview
