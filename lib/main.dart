@@ -20,7 +20,7 @@ Future<void> main() async {
   Box boxSettings = await Hive.openBox(settingsDb);
   final Box boxPoetics = await Hive.openBox(poeticDb);
 
-  if (boxSettings.containsKey(settingsKey)) {
+  if (!boxSettings.containsKey(settingsKey)) {
     /// default settings
     appState = AppState();
     await boxSettings.put(settingsKey, appState.toJson());
