@@ -139,6 +139,10 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   previewModel.thenLogic[index] = '';
+                  if (index == 0) {
+                    /// show error for the first row (at least one is required)
+                    return 'logic?';
+                  }
                 } else {
                   previewModel.thenLogic[index] = value;
                 }
@@ -489,7 +493,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       fit: FlexFit.tight,
                       child: TextFormField(
                         initialValue: formModel.user?.dd,
-                        //keyboardType: TextInputType.numberWithOptions(),
+                        keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         //minLength: 2,
                         //maxLength: 2,
@@ -535,7 +539,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                     if (!updateScenario)
                       ElevatedButton(
                         child: const Text(
-                          '[clean]',
+                          'clean',
                           style: TextStyle(
                               //color: Colors.white,
                               ),
@@ -551,7 +555,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                     if (!updateScenario)
                       ElevatedButton(
                         child: const Text(
-                          '[show example]',
+                          'show example',
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -584,7 +588,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         }
                       },
                       child: const Text(
-                        '[save]',
+                        'save',
                         style: TextStyle(
                           color: Colors.yellow,
                         ),

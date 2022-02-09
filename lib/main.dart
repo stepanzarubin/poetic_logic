@@ -14,47 +14,92 @@ import 'package:poetic_logic/widgets/user_poetic_list.dart';
 import 'models/poetic.dart';
 
 Future<void> main() async {
-  AppState appState;
-
   await Hive.initFlutter();
   Box boxSettings = await Hive.openBox(settingsDb);
-  final Box boxPoetics = await Hive.openBox(poeticDb);
+  Box boxPoetics = await Hive.openBox(poeticDb);
 
   if (!boxSettings.containsKey(settingsKey)) {
     /// default settings
-    appState = AppState();
-    await boxSettings.put(settingsKey, appState.toJson());
+    await boxSettings.put(settingsKey, AppState().toJson());
+
+    /// poetic example
     await boxPoetics.add(jsonDecode(beAllOneJson));
-  } else {
-    /// load settings
-    appState = AppState.fromJson(boxSettings.get(settingsKey));
   }
 
-  runApp(AppSetting(
-    data: appState,
-    child: const MyApp(),
-  ));
+  runApp(
+    const AppStateWidget(
+      child: MyApp(),
+    ),
+  );
 }
 
-class AppSetting extends InheritedWidget {
-  const AppSetting({
+class AppStateScope extends InheritedWidget {
+  const AppStateScope(
+    this.data, {
     Key? key,
-    required this.data,
     required Widget child,
   }) : super(key: key, child: child);
 
   final AppState data;
 
-  static AppSetting of(BuildContext context) {
-    final AppSetting? result =
-        context.dependOnInheritedWidgetOfExactType<AppSetting>();
+  static AppState of(BuildContext context, {bool rebuild = true}) {
+    final AppState? result = rebuild
+        ? context.dependOnInheritedWidgetOfExactType<AppStateScope>()!.data
+        : context.findAncestorWidgetOfExactType<AppStateScope>()!.data;
     assert(result != null, 'No AppSetting found in context');
     return result!;
   }
 
   @override
-  bool updateShouldNotify(AppSetting oldWidget) {
+  bool updateShouldNotify(AppStateScope oldWidget) {
     return data != oldWidget.data;
+  }
+}
+
+class AppStateWidget extends StatefulWidget {
+  const AppStateWidget({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  static AppStateWidgetState of(BuildContext context) {
+    return context.findAncestorStateOfType<AppStateWidgetState>()!;
+  }
+
+  @override
+  AppStateWidgetState createState() => AppStateWidgetState();
+}
+
+class AppStateWidgetState extends State<AppStateWidget> {
+  AppState _data = AppState.fromJson(Hive.box(settingsDb).get(settingsKey));
+
+  Future<void> updateFontSize(double fontSize) async {
+    if (_data.fontSize != fontSize) {
+      _data = _data.copyWith(fontSize: fontSize);
+      await _data.save();
+      setState(() {});
+    }
+  }
+
+  Future<void> updateUser(User user) async {
+    if (_data.user != user) {
+      _data = _data.copyWith(user: user);
+      await _data.save();
+      setState(() {});
+    }
+  }
+
+  Future<void> resetToDefaults() async {
+    _data = AppState();
+    await _data.save();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppStateScope(
+      _data,
+      child: widget.child,
+    );
   }
 }
 
@@ -66,11 +111,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late double _fontSize;
-
   @override
   Widget build(BuildContext context) {
-    _fontSize = AppSetting.of(context).data.fontSize;
+    final double _fontSize = AppStateScope.of(context).fontSize;
+    final double _fontSizeFactor = (_fontSize / Setting.fontSize);
+    final double _fontSizeDelta = (_fontSize - Setting.fontSize).abs();
 
     //MaterialApp materialApp;
 
@@ -91,16 +136,16 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
 
-        // textTheme: TextTheme(
-        //   bodyText2: TextStyle(
-        //     /// todo affect all font sizes respectively
-        //     fontSize: _fontSize,
-        //   ),
-        // ),
-        textTheme: Theme.of(context).textTheme.apply(
-              fontSizeFactor: (_fontSize / Setting.fontSize),
-              //fontSizeDelta: 2.0,
-            ),
+        textTheme: TextTheme(
+          bodyText2: TextStyle(
+            fontSize: _fontSize,
+          ),
+        ),
+        // textTheme: Theme.of(context).textTheme.apply(
+        //       fontSizeFactor: (_fontSize / Setting.fontSize),
+        //fontSizeDelta: 2.0,
+        //),
+
         // elevatedButtonTheme: ElevatedButtonThemeData(
         //   style: ButtonStyle(
         //     //foregroundColor: MaterialStateProperty.all(Colors.white),

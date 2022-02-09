@@ -38,66 +38,54 @@ class _UserPoeticListState extends State<UserPoeticList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My logic'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_box_outlined),
-            onPressed: () {
-              Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName);
-            },
-          ),
-        ],
+        title: const Text('My list'),
       ),
       body: ValueListenableBuilder<Box>(
         valueListenable: Hive.box(poeticDb).listenable(),
         builder: (context, box, widget) {
-          return box.isNotEmpty
-              ? ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: box.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    var recordKey = box.keyAt(index);
-                    var recordValue = box.get(recordKey);
-                    return Card(
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SinglePoetic(
-                                poetic: Poetic.fromJson(recordValue),
-                                dbKey: recordKey,
-                              ),
-                            ),
-                          );
-                        },
+          if (box.isEmpty) {
+            return const Center(
+              child: Text('list is empty'),
+            );
+          }
 
-                        //leading: Text(index.toString()),
-                        //title: Text('Key: ${recordKey.toString()}'),
-                        //subtitle: Text('Value: ${recordValue.toString()}'),
-
-                        title: Text(recordValue['ifLogic']),
-                        // first logic
-                        subtitle: Text(recordValue['thenLogic'][0]),
-                        trailing: IconButton(
-                          onPressed: () {
-                            _handleDelete(recordKey);
-                          },
-                          icon: const Icon(Icons.delete),
+          return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: box.length,
+            itemBuilder: (BuildContext context, int index) {
+              var recordKey = box.keyAt(index);
+              var recordValue = box.get(recordKey);
+              return Card(
+                child: ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SinglePoetic(
+                          poetic: Poetic.fromJson(recordValue),
+                          dbKey: recordKey,
                         ),
                       ),
                     );
                   },
-                )
-              : Center(
-                  child: IconButton(
-                    icon: const Icon(Icons.add),
+
+                  //leading: Text(index.toString()),
+                  //title: Text('Key: ${recordKey.toString()}'),
+                  //subtitle: Text('Value: ${recordValue.toString()}'),
+
+                  title: Text(recordValue['ifLogic']),
+                  // first logic
+                  subtitle: Text(recordValue['thenLogic'][0]),
+                  trailing: IconButton(
                     onPressed: () {
-                      Navigator.pushNamed(
-                          context, PoeticFormStatefulWidget.routeName);
+                      _handleDelete(recordKey);
                     },
+                    icon: const Icon(Icons.delete),
                   ),
-                );
+                ),
+              );
+            },
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

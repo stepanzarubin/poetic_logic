@@ -80,7 +80,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                     Navigator.pop(context);
                   },
                   child: const Text(
-                    '[back]',
+                    'back',
                   ),
                 ),
                 if (!widget.poetic.hasAddedLogic())
@@ -96,7 +96,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                       );
                     },
                     child: const Text(
-                      '[edit]',
+                      'edit',
                     ),
                   )
                 // publish
@@ -104,7 +104,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                 //   const ElevatedButton(
                 //     onPressed: null,
                 //     child: Text(
-                //       '[publish]',
+                //       'publish',
                 //     ),
                 //   )
               ],

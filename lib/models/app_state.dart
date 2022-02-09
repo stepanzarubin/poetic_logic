@@ -7,13 +7,23 @@ part 'app_state.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class AppState extends HasUser {
-  User? user;
-  //User? user = User();
-  double fontSize = Setting.fontSize;
+  final double fontSize;
+  final User? user;
 
   AppState({
+    this.fontSize = Setting.fontSize,
     this.user,
   });
+
+  AppState copyWith({
+    double? fontSize,
+    User? user,
+  }) {
+    return AppState(
+      fontSize: fontSize ?? this.fontSize,
+      user: user ?? this.user,
+    );
+  }
 
   @override
   String getSignature() {
@@ -24,7 +34,7 @@ class AppState extends HasUser {
     }
   }
 
-  Future<dynamic> save() async {
+  Future<void> save() async {
     var box = Hive.box(settingsDb);
     return await box.put(settingsKey, toJson());
   }

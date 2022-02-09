@@ -25,7 +25,7 @@ class PoeticPreview extends StatelessWidget {
           right: 8.0,
         ),
         child: Text(
-          'Added logic:',
+          'Added:',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
