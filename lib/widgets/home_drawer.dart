@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/screens/form.dart';
 import 'package:poetic_logic/screens/help.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
@@ -6,8 +7,6 @@ import 'package:poetic_logic/screens/settings.dart';
 import 'package:poetic_logic/widgets/user_poetic_list.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../main.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({

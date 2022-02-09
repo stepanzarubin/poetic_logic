@@ -13,6 +13,18 @@ class SinglePoetic extends StatefulWidget {
   final Poetic poetic;
   final dynamic dbKey;
 
+  static goHere(BuildContext context, {required Poetic poetic, dynamic dbKey}) {
+    return Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SinglePoetic(
+          poetic: poetic,
+          dbKey: dbKey,
+        ),
+      ),
+    );
+  }
+
   @override
   State<SinglePoetic> createState() => _SinglePoeticState();
 }

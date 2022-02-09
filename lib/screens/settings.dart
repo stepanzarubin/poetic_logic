@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:poetic_logic/common/const.dart';
-import 'package:poetic_logic/main.dart';
-import 'package:poetic_logic/models/app_state.dart';
-import 'package:poetic_logic/models/poetic.dart';
+import 'package:poetic_logic/common/app_state_scope.dart';
+import 'package:poetic_logic/common/app_state.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -18,36 +16,43 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  User user = User();
-  double fontSize = 0;
+  AppState? _appStateFormModel;
 
-  Future<void> _handleChangeFontSize(
-      double fontSize, BuildContext context) async {
-    await AppStateWidget.of(context).updateFontSize(fontSize);
+  Future<void> _handleChangeFontSize(BuildContext context) async {
+    await AppStateWidget.of(context)
+        .updateFontSize(_appStateFormModel!.fontSize);
   }
 
-  Future<void> _handleUpdateUser(User user, BuildContext context) async {
-    await AppStateWidget.of(context).updateUser(user);
+  Future<void> _handleUpdateUser(BuildContext context) async {
+    await AppStateWidget.of(context).updateUser(_appStateFormModel!.user);
   }
 
   Future<void> _handleResetToDefaults(BuildContext context) async {
-    /// subscribe to refresh
-    //final AppState appState = AppStateScope.of(context, rebuild: true);
-    await AppStateWidget.of(context).resetToDefaults();
+    /// subscribe once to refresh, but then how to unsubscribe?
+    /// final AppState appState = AppStateScope.of(context, rebuild: true);
+    /// does this refresh from above without subscription?
 
-    setState(() {});
+    //todo does not work
+    _formKey.currentState!.reset();
+    _appStateFormModel = null;
+    await AppStateWidget.of(context).resetToDefaults();
+    // setState(() {
+    //   _appStateFormModel!.setDefaults();
+    // });
+  }
+
+  void scMsg(BuildContext context, msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg, textAlign: TextAlign.center)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     //print(Theme.of(context).textTheme.bodyText2?.fontSize);
     //print(MediaQuery.of(context).textScaleFactor);
-    final AppState appState = AppStateScope.of(context, rebuild: false);
-    // todo should not affect buttons etc, only titles and body text
-    // interface stick with 16
-    if (fontSize == 0) {
-      fontSize = appState.fontSize;
-    }
+    final AppState appState = AppStateScope.of(context, rebuild: true);
+    _appStateFormModel ??= appState.formModel();
 
     return Scaffold(
       appBar: AppBar(
@@ -68,6 +73,7 @@ class _SettingsState extends State<Settings> {
                     textAlign: TextAlign.left,
                   ),
                   Text(
+                    /// current value
                     appState.fontSize.toInt().toString(),
                     style: Theme.of(context).textTheme.headline6,
                     textAlign: TextAlign.left,
@@ -89,7 +95,7 @@ class _SettingsState extends State<Settings> {
                         'Time changes, goes on, the world still exists, '
                         'so we understand in current circumstances. ',
                         style: TextStyle(
-                          fontSize: fontSize,
+                          fontSize: _appStateFormModel!.fontSize,
                         ),
                         overflow: TextOverflow.clip,
                       ),
@@ -99,44 +105,31 @@ class _SettingsState extends State<Settings> {
                       children: [
                         Expanded(
                           child: Slider(
-                            value: fontSize,
+                            value: _appStateFormModel!.fontSize,
                             min: Setting.minFontSize,
                             max: Setting.maxFontSize,
                             divisions: Setting.sliderDivisions(),
-                            label: fontSize.toString(),
+                            label: _appStateFormModel!.fontSize.toString(),
                             onChanged: (value) {
                               setState(() {
-                                fontSize = value;
+                                _appStateFormModel!.fontSize = value;
                               });
                             },
                           ),
                         ),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: SizedBox(
-                            width: 70,
-                            child: OutlinedButton(
-                              child: const Text('Save'),
-                              onPressed: () async {
-                                try {
-                                  /// to guarantee has to be carefully checked
-                                  await _handleChangeFontSize(
-                                      fontSize, context);
-                                  // ScaffoldMessenger.of(context).showSnackBar(
-                                  //   const SnackBar(
-                                  //     content: Center(child: Text('saved')),
-                                  //   ),
-                                  // );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Center(child: Text('error occurred')),
-                                    ),
-                                  );
-                                } finally {}
-                              },
-                            ),
+                          child: OutlinedButton(
+                            child: const Text('Save'),
+                            onPressed: () async {
+                              try {
+                                /// to guarantee has to be carefully checked
+                                await _handleChangeFontSize(context);
+                                scMsg(context, 'Saved');
+                              } catch (e) {
+                                scMsg(context, 'Error occurred');
+                              } finally {}
+                            },
                           ),
                         ),
                       ],
@@ -163,15 +156,16 @@ class _SettingsState extends State<Settings> {
                         Expanded(
                           flex: 3,
                           child: TextFormField(
-                            initialValue: appState.user?.firstName,
+                            initialValue: _appStateFormModel!.user!.firstName,
                             decoration: const InputDecoration(
                               hintText: 'First name',
                             ),
                             validator: (value) {
                               return null;
                             },
+                            //onChanged: ,
                             onSaved: (value) {
-                              user.firstName = value;
+                              _appStateFormModel!.user!.firstName = value;
                             },
                           ),
                         ),
@@ -181,7 +175,7 @@ class _SettingsState extends State<Settings> {
                         Expanded(
                           flex: 3,
                           child: TextFormField(
-                            initialValue: appState.user?.lastName,
+                            initialValue: _appStateFormModel!.user!.lastName,
                             decoration: const InputDecoration(
                               hintText: 'Last name',
                             ),
@@ -189,7 +183,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              user.lastName = value;
+                              _appStateFormModel!.user!.lastName = value;
                             },
                           ),
                         ),
@@ -200,7 +194,7 @@ class _SettingsState extends State<Settings> {
                           flex: 1,
                           fit: FlexFit.tight,
                           child: TextFormField(
-                            initialValue: appState.user?.mm,
+                            initialValue: _appStateFormModel!.user!.mm,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
                             decoration: const InputDecoration(
@@ -210,7 +204,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              user.mm = value;
+                              _appStateFormModel!.user!.mm = value;
                             },
                           ),
                         ),
@@ -221,7 +215,7 @@ class _SettingsState extends State<Settings> {
                           flex: 1,
                           fit: FlexFit.tight,
                           child: TextFormField(
-                            initialValue: appState.user?.dd,
+                            initialValue: _appStateFormModel!.user!.dd,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
                             decoration: const InputDecoration(
@@ -231,7 +225,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              user.dd = value;
+                              _appStateFormModel!.user!.dd = value;
                             },
                           ),
                         ),
@@ -239,33 +233,20 @@ class _SettingsState extends State<Settings> {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        width: 70,
-                        child: OutlinedButton(
-                          child: const Text('Save'),
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-                              try {
-                                /// to guarantee has to be carefully checked
-                                await _handleUpdateUser(user, context);
-                                //todo fix, remove
-                                // ScaffoldMessenger.of(context).showSnackBar(
-                                //   const SnackBar(
-                                //     content: Center(child: Text('saved')),
-                                //   ),
-                                // );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Center(child: Text('error occurred')),
-                                  ),
-                                );
-                              } finally {}
-                            }
-                          },
-                        ),
+                      child: OutlinedButton(
+                        child: const Text('Save'),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            try {
+                              /// to guarantee has to be carefully checked
+                              await _handleUpdateUser(context);
+                              scMsg(context, 'Saved');
+                            } catch (e) {
+                              scMsg(context, 'error occurred');
+                            } finally {}
+                          }
+                        },
                       ),
                     ),
                     Row(
@@ -280,9 +261,11 @@ class _SettingsState extends State<Settings> {
                         // ),
                         OutlinedButton(
                           child: const Text('Reset to defaults'),
-                          onPressed: () async {
-                            _handleResetToDefaults(context);
-                          },
+                          onPressed: _appStateFormModel!.isDefault()
+                              ? null
+                              : () async {
+                                  await _handleResetToDefaults(context);
+                                },
                         ),
                       ],
                     )

@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:poetic_logic/common/app_state.dart';
+import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/common/const.dart';
 import 'package:poetic_logic/models/poetic.dart';
 import 'package:poetic_logic/widgets/poetic_preview.dart';
+import 'package:poetic_logic/widgets/single_poetic.dart';
 
 class PreviewNotifier extends ValueNotifier<Poetic> {
   PreviewNotifier(Poetic value) : super(value);
@@ -32,8 +35,6 @@ class PoeticFormStatefulWidget extends StatefulWidget {
 
 class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  late final bool updateScenario;
   bool updateNotFoundScenario = false;
 
   // this checks if value has changed, I just need update each time on button press
@@ -61,8 +62,8 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   void initState() {
     super.initState();
 
+    // on update
     if (widget.dbKey != null) {
-      updateScenario = true;
       var box = Hive.box(poeticDb);
       var record = box.get(widget.dbKey);
       if (record == null) {
@@ -72,8 +73,6 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
         formModel = Poetic.fromJson(record);
         previewModel = Poetic.fromJson(record);
       }
-    } else {
-      updateScenario = false;
     }
 
     //new empty row for form
@@ -97,7 +96,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   _addThenLogic() {
     setState(() {
       formModel.thenLogic.add('');
-      previewModel.thenLogic.add('');
+      //previewModel.thenLogic.add('');
     });
   }
 
@@ -173,7 +172,6 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
               width: 55,
               height: 58,
               child: Align(
-                //todo move even lover to avoid clicking previous remove button
                 alignment: Alignment.bottomLeft,
                 child: IconButton(
                   onPressed: () => _addThenLogic(),
@@ -190,6 +188,14 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
+    /// for new record prefill user from app state
+    if (widget.dbKey == null) {
+      final AppState appState = AppStateScope.of(context, rebuild: false);
+      if (appState.user != null) {
+        formModel.user = User.fromJson(appState.user!.toJson());
+      }
+    }
+
     if (updateNotFoundScenario) {
       return Scaffold(
         appBar: AppBar(title: const Text('Poetic form')),
@@ -524,7 +530,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (updateScenario)
+                    if (widget.dbKey != null)
                       ElevatedButton(
                         child: const Text(
                           '[back]',
@@ -536,7 +542,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           Navigator.pop(context);
                         },
                       ),
-                    if (!updateScenario)
+                    if (widget.dbKey == null)
                       ElevatedButton(
                         child: const Text(
                           'clean',
@@ -552,7 +558,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           });
                         },
                       ),
-                    if (!updateScenario)
+                    if (widget.dbKey == null)
                       ElevatedButton(
                         child: const Text(
                           'show example',
@@ -567,16 +573,16 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       ),
                     ElevatedButton(
                       onPressed: () async {
-                        //showing preview and saving doesn't make sense
+                        /// preview and saving in one place doesn't make sense
+                        /// 2 step form or preview button
                         previewNotifier.changeMyData(previewModel);
 
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           try {
-                            await formModel.save(widget.dbKey);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Saved.')),
-                            );
+                            var key = await formModel.save(widget.dbKey);
+                            SinglePoetic.goHere(context,
+                                poetic: formModel, dbKey: key);
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Error occurred.')),

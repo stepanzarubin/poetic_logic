@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/common/const.dart';
-import 'package:poetic_logic/models/app_state.dart';
+import 'package:poetic_logic/common/app_state.dart';
 import 'package:poetic_logic/screens/form.dart';
 import 'package:poetic_logic/screens/help.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
     await boxSettings.put(settingsKey, AppState().toJson());
 
     /// poetic example
+    /// this is Json written
     await boxPoetics.add(jsonDecode(beAllOneJson));
   }
 
@@ -31,76 +33,6 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
-}
-
-class AppStateScope extends InheritedWidget {
-  const AppStateScope(
-    this.data, {
-    Key? key,
-    required Widget child,
-  }) : super(key: key, child: child);
-
-  final AppState data;
-
-  static AppState of(BuildContext context, {bool rebuild = true}) {
-    final AppState? result = rebuild
-        ? context.dependOnInheritedWidgetOfExactType<AppStateScope>()!.data
-        : context.findAncestorWidgetOfExactType<AppStateScope>()!.data;
-    assert(result != null, 'No AppSetting found in context');
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(AppStateScope oldWidget) {
-    return data != oldWidget.data;
-  }
-}
-
-class AppStateWidget extends StatefulWidget {
-  const AppStateWidget({Key? key, required this.child}) : super(key: key);
-
-  final Widget child;
-
-  static AppStateWidgetState of(BuildContext context) {
-    return context.findAncestorStateOfType<AppStateWidgetState>()!;
-  }
-
-  @override
-  AppStateWidgetState createState() => AppStateWidgetState();
-}
-
-class AppStateWidgetState extends State<AppStateWidget> {
-  AppState _data = AppState.fromJson(Hive.box(settingsDb).get(settingsKey));
-
-  Future<void> updateFontSize(double fontSize) async {
-    if (_data.fontSize != fontSize) {
-      _data = _data.copyWith(fontSize: fontSize);
-      await _data.save();
-      setState(() {});
-    }
-  }
-
-  Future<void> updateUser(User user) async {
-    if (_data.user != user) {
-      _data = _data.copyWith(user: user);
-      await _data.save();
-      setState(() {});
-    }
-  }
-
-  Future<void> resetToDefaults() async {
-    _data = AppState();
-    await _data.save();
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppStateScope(
-      _data,
-      child: widget.child,
-    );
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -114,8 +46,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final double _fontSize = AppStateScope.of(context).fontSize;
-    final double _fontSizeFactor = (_fontSize / Setting.fontSize);
-    final double _fontSizeDelta = (_fontSize - Setting.fontSize).abs();
+    //final double _fontSizeFactor = (_fontSize / Setting.fontSize);
+    //final double _fontSizeDelta = (_fontSize - Setting.fontSize).abs();
 
     //MaterialApp materialApp;
 
@@ -136,15 +68,17 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
 
-        textTheme: TextTheme(
-          bodyText2: TextStyle(
-            fontSize: _fontSize,
-          ),
-        ),
-        // textTheme: Theme.of(context).textTheme.apply(
-        //       fontSizeFactor: (_fontSize / Setting.fontSize),
-        //fontSizeDelta: 2.0,
-        //),
+        /// control some fonts
+        // textTheme: TextTheme(
+        //   bodyText2: TextStyle(
+        //     fontSize: _fontSize,
+        //   ),
+        // ),
+        /// control all fonts
+        textTheme: Theme.of(context).textTheme.apply(
+              fontSizeFactor: (_fontSize / Setting.fontSize),
+              //fontSizeDelta: 2.0,
+            ),
 
         // elevatedButtonTheme: ElevatedButtonThemeData(
         //   style: ButtonStyle(
@@ -272,7 +206,7 @@ class _PoeticHomeState extends State<PoeticHome> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(2.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -282,9 +216,9 @@ class _PoeticHomeState extends State<PoeticHome> {
                           /// the button, button should increase or font remain
                           child: const Text('More\n examples'),
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(90, 90),
+                            minimumSize: const Size(90, 60),
                             maximumSize: const Size(180, 180),
-                            shape: const CircleBorder(),
+                            //shape: const CircleBorder(),
                           ),
                           onPressed: () => Navigator.pushNamed(
                               context, PoeticFormStatefulWidget.routeName),
@@ -294,9 +228,9 @@ class _PoeticHomeState extends State<PoeticHome> {
                         child: ElevatedButton(
                           child: const Text('Add\n yours'),
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(110, 110),
+                            minimumSize: const Size(110, 80),
                             maximumSize: const Size(200, 200),
-                            shape: const CircleBorder(),
+                            //shape: const CircleBorder(),
                           ),
                           onPressed: () => Navigator.pushNamed(
                               context, PoeticFormStatefulWidget.routeName),

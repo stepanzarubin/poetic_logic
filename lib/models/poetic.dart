@@ -162,23 +162,30 @@ class Poetic extends HasUser {
   /// Adds or updates record
   Future<dynamic> save(dynamic dbK) async {
     var box = Hive.box(poeticDb);
-    //remove empty strings
+
+    /// remove empty strings
     thenLogic.removeWhere((element) => element.isEmpty);
-    //do not record empty user
+    for (var added in addedLogic) {
+      added.thenLogic.removeWhere((element) => element.isEmpty);
+    }
+
+    /// do not record empty user
     if (user != null && user!.isEmpty()) {
       user = null;
     }
 
     if (dbK != null) {
-      dbKey = dbK;
-      //var json = toJson();
-      //print('updating record, key = $dbKey, thenLogic: $thenLogic');
-      return await box.put(dbK, toJson());
+      // update
+      await box.put(dbK, toJson());
+      return dbK;
     } else {
+      // create
       return await box.add(toJson());
-      //update record with dbKey (optionally)
-      //and check, maybe it already there?
-      //dbKey = dbK;
+
+      /// Update record with dbKey/index (optionally)
+      /// Possible to go with indexes only
+      /// and for poetics this is applicable
+      /// index = key until key is not provided
       //return await box.put(dbKey, toJson());
     }
   }
