@@ -13,7 +13,6 @@ class PreviewNotifier extends ValueNotifier<Poetic> {
   PreviewNotifier(Poetic value) : super(value);
 
   void changeMyData(Poetic value) {
-    //todo is this correct?
     this.value = value;
     notifyListeners();
   }
@@ -41,20 +40,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   // final ValueNotifier<Poetic> _defaultNotifier =
   //     ValueNotifier<Poetic>(Poetic(poeticLogic: PoeticLogic()));
 
-  Poetic formModel = Poetic(
-    ifLogic: '',
-    quote: Quote(),
-    thenLogic: [],
-    user: User(),
-  );
-
-  /// todo sense to have?
-  Poetic previewModel = Poetic(
-    ifLogic: 'Something.',
-    quote: Quote.quote('Quote text (exactly)', 'Source title', '1675', '245'),
-    thenLogic: ['Something else.'],
-    user: User.user('First name', 'Last name', '01', '01'),
-  );
+  Poetic formModel = Poetic.form();
 
   late final PreviewNotifier previewNotifier;
 
@@ -71,32 +57,22 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
       } else {
         updateNotFoundScenario = false;
         formModel = Poetic.fromJson(record);
-        previewModel = Poetic.fromJson(record);
       }
     }
 
-    //new empty row for form
-    formModel.thenLogic.add('');
-
-    previewNotifier = PreviewNotifier(previewModel);
-    previewNotifier.changeMyData(previewModel);
+    previewNotifier = PreviewNotifier(formModel);
+    //previewNotifier.changeMyData(formModel);
   }
 
-  ///logic
   _removeThenLogic(int index) {
     setState(() {
       formModel.thenLogic.removeAt(index);
-
-      //todo preview
-      //do main form also listenable?
-      //previewModel.thenLogic.removeAt(index);
     });
   }
 
   _addThenLogic() {
     setState(() {
       formModel.thenLogic.add('');
-      //previewModel.thenLogic.add('');
     });
   }
 
@@ -129,21 +105,16 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
               onChanged: (value) {
                 if (value.isEmpty) {
                   formModel.thenLogic[index] = '';
-                  previewModel.thenLogic[index] = '';
                 } else {
                   formModel.thenLogic[index] = value;
-                  previewModel.thenLogic[index] = value;
                 }
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  previewModel.thenLogic[index] = '';
                   if (index == 0) {
                     /// show error for the first row (at least one is required)
                     return 'logic?';
                   }
-                } else {
-                  previewModel.thenLogic[index] = value;
                 }
                 return null;
               },
@@ -186,15 +157,19 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
     return rows;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    /// for new record prefill user from app state
+  /// For new record prefill user from app state
+  void _userFromAppState(BuildContext context) {
     if (widget.dbKey == null) {
       final AppState appState = AppStateScope.of(context, rebuild: false);
       if (appState.user != null) {
         formModel.user = User.fromJson(appState.user!.toJson());
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userFromAppState(context);
 
     if (updateNotFoundScenario) {
       return Scaffold(
@@ -220,13 +195,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                 ),
               ),
               TextFormField(
-                //on first launch keyboard is overlapping part of a screen
-                //autofocus: true,
                 initialValue: formModel.ifLogic,
                 minLines: 1,
                 maxLines: 10,
+
+                /// does it work without it?
+                onChanged: (value) {
+                  formModel.ifLogic = value.toString();
+                },
                 validator: (value) {
-                  previewModel.ifLogic = value ?? '';
                   if (value == null || value.isEmpty) {
                     return 'logic?';
                   }
@@ -266,12 +243,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       maxLines: 5,
                       //maxLength: 100,
                       decoration: const InputDecoration(
-                          //isDense: true,
                           //border: OutlineInputBorder(),
                           ),
 
+                      /// how happens that on setState this if preserved and
+                      /// user.firstName is not?
+                      onChanged: (value) {
+                        formModel.quote!.text = value.toString();
+                      },
                       validator: (value) {
-                        previewModel.quote!.text = value ?? '';
                         return null;
                       },
                       onSaved: (value) {
@@ -317,11 +297,12 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         //maxLength: 255,
                         decoration: const InputDecoration(
                           hintText: 'Title',
-                          //isDense: true,
                           //helperText: 'for specific notation use just title',
                         ),
+                        onChanged: (value) {
+                          formModel.quote!.title = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.quote!.title = value ?? '';
                           return null;
                         },
                         onSaved: (value) {
@@ -344,10 +325,11 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         //maxLength: 4,
                         decoration: const InputDecoration(
                           hintText: 'year',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.quote!.year = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.quote!.year = value ?? '';
                           return null;
                         },
                         onSaved: (value) {
@@ -369,10 +351,11 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         //maxLength: 5,
                         decoration: const InputDecoration(
                           hintText: 'pages',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.quote!.pages = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.quote!.pages = value ?? '';
                           return null;
                         },
                         onSaved: (value) {
@@ -421,14 +404,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         initialValue: formModel.user?.firstName,
                         decoration: const InputDecoration(
                           hintText: 'First name',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.user!.firstName = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.user!.firstName = value;
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.user!.firstName = value;
+                          formModel.user!.firstName;
                         },
                       ),
                     ),
@@ -441,14 +425,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         initialValue: formModel.user?.lastName,
                         decoration: const InputDecoration(
                           hintText: 'Last name',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.user!.lastName = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.user!.lastName = value;
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.user!.lastName = value;
+                          formModel.user!.lastName = value.toString();
                         },
                       ),
                     ),
@@ -477,14 +462,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         //maxLength: 2,
                         decoration: const InputDecoration(
                           hintText: 'mm',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.user!.mm = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.user!.mm = value;
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.user!.mm = value;
+                          formModel.user!.mm = value.toString();
                         },
                       ),
                     ),
@@ -505,14 +491,15 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         //maxLength: 2,
                         decoration: const InputDecoration(
                           hintText: 'dd',
-                          //isDense: true,
                         ),
+                        onChanged: (value) {
+                          formModel.user!.dd = value.toString();
+                        },
                         validator: (value) {
-                          previewModel.user!.dd = value;
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.user!.dd = value;
+                          formModel.user!.dd = value.toString();
                         },
                       ),
                     ),
@@ -533,7 +520,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                     if (widget.dbKey != null)
                       ElevatedButton(
                         child: const Text(
-                          '[back]',
+                          'back',
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -552,8 +539,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         ),
                         onPressed: () {
                           setState(() {
-                            formModel.thenLogic.clear();
-                            formModel.thenLogic.add('');
+                            formModel = Poetic.form();
                             _formKey.currentState!.reset();
                           });
                         },
@@ -563,7 +549,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         child: const Text(
                           'show example',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.lime,
                           ),
                         ),
                         onPressed: () {
@@ -573,9 +559,10 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       ),
                     ElevatedButton(
                       onPressed: () async {
+                        /// todo
                         /// preview and saving in one place doesn't make sense
                         /// 2 step form or preview button
-                        previewNotifier.changeMyData(previewModel);
+                        previewNotifier.changeMyData(formModel);
 
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();

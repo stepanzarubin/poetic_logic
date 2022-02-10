@@ -25,7 +25,7 @@ class AppStateScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(AppStateScope oldWidget) {
-    return jsonEncode(data.toJson()) != jsonEncode(oldWidget.data.toJson());
+    return data != oldWidget.data;
   }
 }
 
@@ -62,12 +62,12 @@ class AppStateWidgetState extends State<AppStateWidget> {
   }
 
   Future<void> updateUser(User? user) async {
-    //if (_data.user != user) {
-    setState(() {
-      _data = _data.copyWith(user: user);
-    });
-    await _data.save();
-    //}
+    if (_data.user != user) {
+      setState(() {
+        _data = _data.copyWith(user: user);
+      });
+      await _data.save();
+    }
   }
 
   Future<void> resetToDefaults() async {

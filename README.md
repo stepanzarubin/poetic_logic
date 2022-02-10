@@ -2,6 +2,8 @@
 
 Logic is also poetic because can cure the same.
 
+Appreciated help with writing tests.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

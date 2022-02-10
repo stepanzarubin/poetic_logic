@@ -16,29 +16,60 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController mmController = TextEditingController();
+  final TextEditingController ddController = TextEditingController();
+
   AppState? _appStateFormModel;
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    mmController.dispose();
+    ddController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleChangeFontSize(BuildContext context) async {
     await AppStateWidget.of(context)
         .updateFontSize(_appStateFormModel!.fontSize);
   }
 
-  Future<void> _handleUpdateUser(BuildContext context) async {
-    await AppStateWidget.of(context).updateUser(_appStateFormModel!.user);
+  Future<void> _handleUpdateUser(
+    BuildContext context,
+    AppState appState,
+  ) async {
+    if (_isUserChanged(appState)) {
+      await AppStateWidget.of(context).updateUser(_appStateFormModel!.user);
+    }
   }
 
   Future<void> _handleResetToDefaults(BuildContext context) async {
-    /// subscribe once to refresh, but then how to unsubscribe?
-    /// final AppState appState = AppStateScope.of(context, rebuild: true);
-    /// does this refresh from above without subscription?
-
-    //todo does not work
-    _formKey.currentState!.reset();
+    /// important, this clears controllers
+    /// form should have this feature but it can only clear to default value
     _appStateFormModel = null;
     await AppStateWidget.of(context).resetToDefaults();
-    // setState(() {
-    //   _appStateFormModel!.setDefaults();
-    // });
+  }
+
+  bool _isFontChanged(AppState appState) {
+    if (_appStateFormModel!.fontSize != appState.fontSize) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool _isUserChanged(AppState appState) {
+    if (appState.user == null && _appStateFormModel!.user!.isEmpty()) {
+      return false;
+    }
+    if (_appStateFormModel!.user != appState.user) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void scMsg(BuildContext context, msg) {
@@ -49,10 +80,12 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    //print(Theme.of(context).textTheme.bodyText2?.fontSize);
-    //print(MediaQuery.of(context).textScaleFactor);
     final AppState appState = AppStateScope.of(context, rebuild: true);
-    _appStateFormModel ??= appState.formModel();
+    _appStateFormModel ??= appState.giveNewCopy();
+    firstNameController.text = _appStateFormModel!.user!.firstName;
+    lastNameController.text = _appStateFormModel!.user!.lastName;
+    mmController.text = _appStateFormModel!.user!.mm;
+    ddController.text = _appStateFormModel!.user!.dd;
 
     return Scaffold(
       appBar: AppBar(
@@ -121,15 +154,17 @@ class _SettingsState extends State<Settings> {
                           alignment: Alignment.centerRight,
                           child: OutlinedButton(
                             child: const Text('Save'),
-                            onPressed: () async {
-                              try {
-                                /// to guarantee has to be carefully checked
-                                await _handleChangeFontSize(context);
-                                scMsg(context, 'Saved');
-                              } catch (e) {
-                                scMsg(context, 'Error occurred');
-                              } finally {}
-                            },
+                            onPressed: !_isFontChanged(appState)
+                                ? null
+                                : () async {
+                                    try {
+                                      /// to guarantee has to be carefully checked
+                                      await _handleChangeFontSize(context);
+                                      scMsg(context, 'Font saved');
+                                    } catch (e) {
+                                      scMsg(context, 'Error occurred');
+                                    } finally {}
+                                  },
                           ),
                         ),
                       ],
@@ -156,16 +191,20 @@ class _SettingsState extends State<Settings> {
                         Expanded(
                           flex: 3,
                           child: TextFormField(
-                            initialValue: _appStateFormModel!.user!.firstName,
+                            controller: firstNameController,
+                            //initialValue: _appStateFormModel!.user!.firstName,
                             decoration: const InputDecoration(
                               hintText: 'First name',
                             ),
                             validator: (value) {
                               return null;
                             },
-                            //onChanged: ,
-                            onSaved: (value) {
+                            onChanged: (value) {
                               _appStateFormModel!.user!.firstName = value;
+                            },
+                            onSaved: (value) {
+                              _appStateFormModel!.user!.firstName =
+                                  value.toString().trim();
                             },
                           ),
                         ),
@@ -175,15 +214,20 @@ class _SettingsState extends State<Settings> {
                         Expanded(
                           flex: 3,
                           child: TextFormField(
-                            initialValue: _appStateFormModel!.user!.lastName,
+                            controller: lastNameController,
+                            //initialValue: _appStateFormModel!.user!.lastName,
                             decoration: const InputDecoration(
                               hintText: 'Last name',
                             ),
+                            onChanged: (value) {
+                              _appStateFormModel!.user!.lastName = value;
+                            },
                             validator: (value) {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.lastName = value;
+                              _appStateFormModel!.user!.lastName =
+                                  value.toString().trim();
                             },
                           ),
                         ),
@@ -194,17 +238,22 @@ class _SettingsState extends State<Settings> {
                           flex: 1,
                           fit: FlexFit.tight,
                           child: TextFormField(
-                            initialValue: _appStateFormModel!.user!.mm,
+                            controller: mmController,
+                            //initialValue: _appStateFormModel!.user!.mm,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
                             decoration: const InputDecoration(
                               hintText: 'mm',
                             ),
+                            onChanged: (value) {
+                              _appStateFormModel!.user!.mm = value;
+                            },
                             validator: (value) {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.mm = value;
+                              _appStateFormModel!.user!.mm =
+                                  value.toString().trim();
                             },
                           ),
                         ),
@@ -215,17 +264,22 @@ class _SettingsState extends State<Settings> {
                           flex: 1,
                           fit: FlexFit.tight,
                           child: TextFormField(
-                            initialValue: _appStateFormModel!.user!.dd,
+                            controller: ddController,
+                            //initialValue: _appStateFormModel!.user!.dd,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
                             decoration: const InputDecoration(
                               hintText: 'dd',
                             ),
+                            onChanged: (value) {
+                              _appStateFormModel!.user!.dd = value;
+                            },
                             validator: (value) {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.dd = value;
+                              _appStateFormModel!.user!.dd =
+                                  value.toString().trim();
                             },
                           ),
                         ),
@@ -236,12 +290,17 @@ class _SettingsState extends State<Settings> {
                       child: OutlinedButton(
                         child: const Text('Save'),
                         onPressed: () async {
+                          if (!_isUserChanged(appState)) {
+                            scMsg(context, 'Nothing to update');
+                            return;
+                          }
+
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
                             try {
                               /// to guarantee has to be carefully checked
-                              await _handleUpdateUser(context);
-                              scMsg(context, 'Saved');
+                              await _handleUpdateUser(context, appState);
+                              scMsg(context, 'User saved');
                             } catch (e) {
                               scMsg(context, 'error occurred');
                             } finally {}
@@ -249,25 +308,14 @@ class _SettingsState extends State<Settings> {
                         },
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        //todo check it updates if not saved and returned
-                        // OutlinedButton(
-                        //   child: const Text('Undo changes'),
-                        //   onPressed: () async {
-                        //     //_formKey.currentState!.reset();
-                        //   },
-                        // ),
-                        OutlinedButton(
-                          child: const Text('Reset to defaults'),
-                          onPressed: _appStateFormModel!.isDefault()
-                              ? null
-                              : () async {
-                                  await _handleResetToDefaults(context);
-                                },
-                        ),
-                      ],
+                    OutlinedButton(
+                      child: const Text('Reset to defaults'),
+                      onPressed: appState.isDefault()
+                          ? null
+                          : () async {
+                              await _handleResetToDefaults(context);
+                              scMsg(context, 'Reset');
+                            },
                     )
                   ],
                 ),

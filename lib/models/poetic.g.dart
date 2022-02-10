@@ -7,10 +7,10 @@ part of 'poetic.dart';
 // **************************************************************************
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
-      firstName: json['firstName'] as String?,
-      lastName: json['lastName'] as String?,
-      mm: json['mm'] as String?,
-      dd: json['dd'] as String?,
+      firstName: json['firstName'] as String? ?? '',
+      lastName: json['lastName'] as String? ?? '',
+      mm: json['mm'] as String? ?? '',
+      dd: json['dd'] as String? ?? '',
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -55,15 +55,13 @@ Poetic _$PoeticFromJson(Map<String, dynamic> json) => Poetic(
       quote: json['quote'] == null
           ? null
           : Quote.fromJson(json['quote'] as Map<String, dynamic>),
-      thenLogic: (json['thenLogic'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
       user: json['user'] == null
           ? null
           : User.fromJson(json['user'] as Map<String, dynamic>),
     )
       ..dbKey = json['dbKey']
+      ..thenLogic =
+          (json['thenLogic'] as List<dynamic>).map((e) => e as String).toList()
       ..addedLogic = (json['addedLogic'] as List<dynamic>)
           .map((e) => AddedLogic.fromJson(e as Map<String, dynamic>))
           .toList();

@@ -6,16 +6,16 @@ part 'poetic.g.dart';
 @JsonSerializable()
 class User {
   static const String oneOfPeople = 'one of people';
-  String? firstName;
-  String? lastName;
-  String? mm;
-  String? dd;
+  String firstName = '';
+  String lastName = '';
+  String mm = '';
+  String dd = '';
 
   User({
-    this.firstName,
-    this.lastName,
-    this.mm,
-    this.dd,
+    this.firstName = '',
+    this.lastName = '',
+    this.mm = '',
+    this.dd = '',
   });
 
   User.user(
@@ -26,10 +26,7 @@ class User {
   );
 
   bool isEmpty() {
-    return (firstName == null || firstName!.isEmpty) &&
-        (lastName == null || lastName!.isEmpty) &&
-        (mm == null || mm!.isEmpty) &&
-        (dd == null || dd!.isEmpty);
+    return firstName.isEmpty && lastName.isEmpty && mm.isEmpty && dd.isEmpty;
   }
 
   String getSignature() {
@@ -39,6 +36,18 @@ class User {
       return '$firstName $lastName, $mm/$dd';
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is User &&
+        other.firstName == firstName &&
+        other.lastName == lastName &&
+        other.mm == mm &&
+        other.dd == dd;
+  }
+
+  @override
+  int get hashCode => Object.hash(firstName, lastName, mm, dd);
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);
@@ -50,13 +59,11 @@ abstract class HasUser {
   }
 }
 
-/// Quote (I could have single String for (Holy Bible, .. : 3:28)
-/// reason - standard, people don't know how to format/quote
 @JsonSerializable()
 class Quote {
   String text = '';
 
-  /// user can put everything in a title if he is sure about format
+  /// should be used for custom format, overriding (Title, year: pages)
   String? title;
   String? year;
   String? pages;
@@ -122,18 +129,13 @@ class Poetic extends HasUser {
   Poetic({
     this.ifLogic = '',
     this.quote,
-    this.thenLogic = const [],
     this.user,
   });
 
-  //todo read constructors
-  Poetic.form({
-    this.ifLogic = '',
-    this.quote,
-    this.thenLogic = const [],
-    this.user,
-  }) {
-    thenLogic = ['Then logic constructor body.'];
+  Poetic.form() {
+    thenLogic.add('');
+    quote = Quote();
+    user = User();
   }
 
   @override

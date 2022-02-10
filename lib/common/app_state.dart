@@ -20,6 +20,8 @@ mixin Setting {
 @JsonSerializable(explicitToJson: true)
 class AppState extends HasUser {
   double fontSize = Setting.fontSize;
+
+  /// User as null only to avoid saving empty Maps and Json Maps and Json
   User? user;
 
   AppState({
@@ -27,6 +29,7 @@ class AppState extends HasUser {
     this.user,
   });
 
+  /// Uses this.user
   AppState copyWith({
     double? fontSize,
     User? user,
@@ -37,37 +40,41 @@ class AppState extends HasUser {
     );
   }
 
-  /// Going to remember user name after first Poetic is submitted
-  /// does it make sense to keep user as null?
-  AppState formModel() {
+  /// Creates different copy with new User which is applicable to give values
+  /// Reason:
+  /// Object/instance is passed by reference, so:
+  /// user: user ?? User()
+  /// changing receiver updates this.user, what may also trigger
+  /// change notification
+  AppState giveNewCopy({bool createUser = true}) {
+    User? newUser;
+    if (user != null) {
+      newUser = User.user(user!.firstName, user!.lastName, user!.mm, user!.dd);
+    } else if (createUser) {
+      newUser = User();
+    }
+
     return AppState(
       fontSize: fontSize,
-      user: user ?? User(),
+      user: newUser,
     );
   }
 
+  /// User() and null is the same
   bool isDefault() {
     var _default = AppState();
-    // user null and user not null
-    //if (jsonEncode(toJson()) == jsonEncode(_default.toJson())) {
-    if (_default.fontSize != fontSize) {
-      return false;
+    if (this == _default || this == _default.giveNewCopy()) {
+      return true;
     }
-
-    // user without credentials is valid empty user
-    if (user != null && !user!.isEmpty()) {
-      return false;
-    }
-
-    return true;
+    return false;
   }
 
   /// not for Inherited data
-  void setDefaults() {
-    var _default = AppState();
-    fontSize = _default.fontSize;
-    user = _default.user;
-  }
+  // void setDefaults() {
+  //   var _default = AppState();
+  //   fontSize = _default.fontSize;
+  //   user = _default.user;
+  // }
 
   @override
   String getSignature() {
@@ -82,6 +89,16 @@ class AppState extends HasUser {
     var box = Hive.box(settingsDb);
     return await box.put(settingsKey, toJson());
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AppState &&
+        other.fontSize == fontSize &&
+        other.user == user;
+  }
+
+  @override
+  int get hashCode => Object.hash(fontSize, user);
 
   factory AppState.fromJson(Map<String, dynamic> json) =>
       _$AppStateFromJson(json);

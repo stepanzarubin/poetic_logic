@@ -158,9 +158,10 @@ class PoeticPreview extends StatelessWidget {
           ),
         ),
         for (var logic in model.thenLogic)
-          SelectableText(
-            logic,
-          ),
+          if (logic.isNotEmpty)
+            SelectableText(
+              logic,
+            ),
         Text(
           model.getSignature(),
           style: const TextStyle(
