@@ -192,7 +192,7 @@ class _PoeticHomeState extends State<PoeticHome> {
                 ),
                 PoeticPreview(
                   model: model,
-                  addedLimit: 2,
+                  addedDisplayLimit: 2,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 3),

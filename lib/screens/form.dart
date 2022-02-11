@@ -88,8 +88,6 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
     for (int index = 0; index < formModel.thenLogic.length; index++) {
       rows.add(Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        //todo only add for row?
-        //key: UniqueKey(),
         children: [
           Expanded(
             flex: 9,
@@ -129,13 +127,9 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
             SizedBox(
               width: 55,
               height: 40,
-              child: Align(
-                /// todo good only for small screens
-                //alignment: index.isEven ? Alignment.bottomLeft : Alignment.topRight,
-                child: IconButton(
-                  onPressed: () => _removeThenLogic(index),
-                  icon: const Icon(Icons.remove_circle_outlined),
-                ),
+              child: IconButton(
+                onPressed: () => _removeThenLogic(index),
+                icon: const Icon(Icons.remove_circle_outlined),
               ),
             )
           else
@@ -306,7 +300,6 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           return null;
                         },
                         onSaved: (value) {
-                          //todo can be null? if Quote is not defined
                           formModel.quote!.title = value;
                         },
                       ),

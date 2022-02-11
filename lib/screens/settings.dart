@@ -298,7 +298,6 @@ class _SettingsState extends State<Settings> {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
                             try {
-                              /// to guarantee has to be carefully checked
                               await _handleUpdateUser(context, appState);
                               scMsg(context, 'User saved');
                             } catch (e) {

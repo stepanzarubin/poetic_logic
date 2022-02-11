@@ -47,8 +47,6 @@ class _SinglePoeticState extends State<SinglePoetic> {
         child: ListView(
           children: [
             PoeticPreview(model: widget.poetic),
-
-            /// todo user adds his logic in the same way as other users
             if (!widget.poetic.hasAddedLogic())
               Form(
                 key: _formKey,

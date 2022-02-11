@@ -7,11 +7,6 @@ const poeticDb = 'poetic_logic_local_db';
 ///   last saved index to be able to partially update
 const poeticPublishedDb = 'poetic_logic_published_db';
 
-/// todo
-/// starting page: with example
-/// sync on startup: false
-/// manual sync
-/// updates published
 const settingsDb = 'poetic_logic_settings_db';
 const settingsKey = 'settings';
 

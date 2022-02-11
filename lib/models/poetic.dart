@@ -121,7 +121,7 @@ class Poetic extends HasUser {
   dynamic dbKey;
 
   String ifLogic = '';
-  Quote? quote = Quote(); //todo what is does if does not set the default?
+  Quote? quote = Quote(); //TODO: What is does if does not set the default?
   List<String> thenLogic = [];
   User? user;
   List<AddedLogic> addedLogic = [];
@@ -151,10 +151,10 @@ class Poetic extends HasUser {
     return addedLogic.isNotEmpty;
   }
 
+  /// TODO: Added logic can be added only after publishing
+  /// after which original record become not editable, author can update
+  /// until somebody adds his first logic, and then add same as anybody else
   bool isPublished() {
-    /// todo temporary, added logic can be added only after publishing
-    /// after which original record become not editable, author can update
-    /// until somebody adds his first logic
     return hasAddedLogic();
   }
 

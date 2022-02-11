@@ -1,112 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:poetic_logic/models/poetic.dart';
 
-///todo get rid of code duplication for displaying if/then
 class PoeticPreview extends StatelessWidget {
   const PoeticPreview({
     Key? key,
     required this.model,
-    this.addedLimit = 0,
+    this.addedDisplayLimit = 0,
   }) : super(key: key);
 
   final Poetic model;
 
-  /// Display shorter version by limiting number of added logic
-  final int addedLimit;
+  /// Shorter version by limiting number of displayed records
+  /// 0 - unlimited
+  final int addedDisplayLimit;
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> addedLogicSection = [];
-
-    if (model.addedLogic.isNotEmpty && addedLimit != 0) {
-      addedLogicSection.add(const Divider());
-      addedLogicSection.add(const Padding(
-        padding: EdgeInsets.only(
-          right: 8.0,
-        ),
-        child: Text(
-          'Added:',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.right,
-        ),
-      ));
-
-      int addedCounter = 0;
-      for (var addedLogicMap in model.addedLogic) {
-        List<Widget> addedLogicWidgets = [];
-        for (var logic in addedLogicMap.thenLogic) {
-          addedLogicWidgets.add(
-            SelectableText(
-              logic,
-              textAlign: TextAlign.right,
-            ),
-          );
-        }
-
-        addedLogicWidgets.add(
-          Text(
-            addedLogicMap.getSignature(),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        );
-
-        ///todo 80% right
-        ///8/10 scale
-        ///and better be of the size of the content, smaller the text
-        ///smaller the section per user
-        ///          FractionallySizedBox(
-        //             alignment: Alignment.topRight,
-        //             widthFactor: 0.8,
-
-        if (++addedCounter == addedLimit) {
-          addedLogicWidgets.add(const Text(
-            '.........',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ));
-        }
-
-        /// todo
-        /// ConstrainedBox
-        addedLogicSection.add(
-          Container(
-            ///does not work here
-            // constraints: const BoxConstraints(
-            //   minWidth: 10,
-            //   maxWidth: 50,
-            // ),
-            padding: const EdgeInsets.all(2.0),
-            margin: const EdgeInsets.all(4.0),
-            //color: Colors.blueGrey.shade100,
-            decoration: BoxDecoration(
-              color: Colors.blueGrey.shade100,
-              // border: Border.all(
-              //   width: 0.1,
-              // ),
-              borderRadius: BorderRadius.circular(3),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              //direction: Axis.vertical,
-              //crossAxisAlignment: WrapCrossAlignment.end,
-              //alignment: WrapAlignment.end,
-              //spacing: 3,
-              children: addedLogicWidgets,
-            ),
-          ),
-        );
-
-        if (addedCounter == addedLimit) {
-          break;
-        }
-      }
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -125,30 +34,9 @@ class PoeticPreview extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
-        /// todo Column for 2 widgets? try removing it
-        /// ...[widget, widget]
         if (model.quote != null)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SelectableText(
-                model.quote!.text,
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              SelectableText(
-                '('
-                '${model.quote!.title}, '
-                '${model.quote!.year}: p. '
-                '${model.quote!.pages}'
-                ')',
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
+          QuoteWidget(
+            model: model.quote!,
           ),
         const Text(
           'Then:',
@@ -168,8 +56,148 @@ class PoeticPreview extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        ...addedLogicSection,
+
+        if (model.addedLogic.isNotEmpty) ...[
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.only(
+              right: 8.0,
+            ),
+            child: Text(
+              'Added:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          AddedLogicList(
+            addedLogic: model.addedLogic,
+            addedDisplayLimit: addedDisplayLimit,
+          )
+        ],
+
+        /// TODO: Add your to this poetic
+        /// for preview can be show as a disabled button
       ],
+    );
+  }
+}
+
+class QuoteWidget extends StatelessWidget {
+  const QuoteWidget({
+    Key? key,
+    required this.model,
+  }) : super(key: key);
+
+  final Quote model;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SelectableText(
+          model.text,
+          style: const TextStyle(
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+        SelectableText(
+          '('
+          '${model.title}, '
+          '${model.year}: p. '
+          '${model.pages}'
+          ')',
+          style: const TextStyle(
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class AddedLogicList extends StatelessWidget {
+  const AddedLogicList({
+    Key? key,
+    required this.addedLogic,
+    this.addedDisplayLimit = 0,
+  }) : super(key: key);
+
+  /// 0 - unlimited
+  final int addedDisplayLimit;
+  final List<AddedLogic> addedLogic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      direction: Axis.horizontal,
+      alignment: WrapAlignment.end,
+      spacing: 5,
+      runSpacing: 5,
+      children: [
+        for (var i = 0;
+            i <
+                ((addedDisplayLimit != 0 &&
+                        addedDisplayLimit < addedLogic.length)
+                    ? addedDisplayLimit
+                    : addedLogic.length);
+            i++)
+          AddedLogicWidget(
+            addedLogic: addedLogic[i],
+          )
+      ],
+    );
+  }
+}
+
+class AddedLogicWidget extends StatelessWidget {
+  const AddedLogicWidget({
+    Key? key,
+    required this.addedLogic,
+  }) : super(key: key);
+
+  final AddedLogic addedLogic;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 350,
+      child: Container(
+        // constraints: const BoxConstraints(
+        //   minWidth: 350,
+        //   maxWidth: 350,
+        //   minHeight: 50,
+        //   maxHeight: 50,
+        // ),
+        //padding: const EdgeInsets.all(2.0),
+        //margin: const EdgeInsets.all(4.0),
+        //color: Colors.blueGrey.shade100,
+        decoration: BoxDecoration(
+          color: Colors.blueGrey.shade100,
+          // border: Border.all(
+          //   width: 0.1,
+          // ),
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (var logic in addedLogic.thenLogic)
+              SelectableText(
+                logic,
+                textAlign: TextAlign.right,
+              ),
+            Text(
+              addedLogic.getSignature(),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

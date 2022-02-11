@@ -74,14 +74,9 @@ class AppStateWidgetState extends State<AppStateWidget> {
     /// faster update UI and then safe to the database
     /// otherwise user would need to await
     setState(() {
-      /// todo should be _data = , otherwise it has nothing to
-      /// compare with, and it means it is important to know how this old and new
-      /// data is set
       _data = AppState();
     });
-    try {
-      await _data.save();
-    } finally {}
+    await _data.save();
   }
 
   @override
