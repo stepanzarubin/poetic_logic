@@ -57,19 +57,17 @@ class HomeDrawer extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.add_box_outlined),
                 title: const Text('Add logic'),
-                onTap: () => Navigator.pushNamed(
-                    context, PoeticFormStatefulWidget.routeName),
+                onTap: () => Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
               ),
               ListTile(
                 leading: const Icon(Icons.list_alt),
                 title: const Text('My list'),
-                onTap: () =>
-                    Navigator.pushNamed(context, UserPoeticList.routeName),
+                onTap: () => Navigator.pushNamed(context, UserPoeticList.routeName),
               ),
-              const ListTile(
-                leading: Icon(Icons.list_alt),
-                title: Text('Examples'),
-              ),
+              // const ListTile(
+              //   leading: Icon(Icons.list_alt),
+              //   title: Text('Examples'),
+              // ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.settings),
@@ -96,8 +94,7 @@ class HomeDrawer extends StatelessWidget {
                       child: const Text('github: stepanzarubin/poetic_logic'),
                       onPressed: () async {
                         try {
-                          await launch(
-                              'https://github.com/stepanzarubin/poetic_logic');
+                          await launch('https://github.com/stepanzarubin/poetic_logic');
                         } finally {}
                       },
                     ),
@@ -106,8 +103,7 @@ class HomeDrawer extends StatelessWidget {
                       title: const Text('Share app'),
                       onTap: () async {
                         try {
-                          await Share.share(
-                              'Check out the app https://play.google.com/store');
+                          await Share.share('Check out the app https://play.google.com/store');
                         } finally {}
                       },
                     ),

@@ -5,8 +5,9 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:poetic_logic/common/app_state.dart';
 import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/common/const.dart';
+import 'package:poetic_logic/common/global.dart';
 import 'package:poetic_logic/models/poetic.dart';
-import 'package:poetic_logic/widgets/poetic_preview.dart';
+import 'package:poetic_logic/widgets/poetic_view.dart';
 import 'package:poetic_logic/widgets/single_poetic.dart';
 
 class PreviewNotifier extends ValueNotifier<Poetic> {
@@ -28,20 +29,13 @@ class PoeticFormStatefulWidget extends StatefulWidget {
   final dynamic dbKey;
 
   @override
-  State<PoeticFormStatefulWidget> createState() =>
-      _PoeticFormStatefulWidgetState();
+  State<PoeticFormStatefulWidget> createState() => _PoeticFormStatefulWidgetState();
 }
 
 class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool updateNotFoundScenario = false;
-
-  // this checks if value has changed, I just need update each time on button press
-  // final ValueNotifier<Poetic> _defaultNotifier =
-  //     ValueNotifier<Poetic>(Poetic(poeticLogic: PoeticLogic()));
-
   Poetic formModel = Poetic.form();
-
   late final PreviewNotifier previewNotifier;
 
   @override
@@ -56,6 +50,8 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
         updateNotFoundScenario = true;
       } else {
         updateNotFoundScenario = false;
+
+        /// TODO: user is null
         formModel = Poetic.fromJson(record);
       }
     }
@@ -80,8 +76,8 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
   List<Widget> _thenLogicSection() {
     List<Widget> rows = [];
     if (formModel.thenLogic.isEmpty) {
-      //the only scenario - user removed all items, them I am keeping one field
-      //and now showing remove button for empty row
+      /// user removed all items, them I am keeping one field
+      /// and not showing remove button for empty row
       return rows;
     }
     //excluding empty string row
@@ -97,20 +93,21 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
               minLines: 1,
               maxLines: 10,
               decoration: InputDecoration(
-                hintText:
-                    formModel.thenLogic.length == 1 ? 'Poetic logic' : null,
+                hintText: formModel.thenLogic.length == 1 ? 'Poetic logic' : null,
               ),
               onChanged: (value) {
-                if (value.isEmpty) {
-                  formModel.thenLogic[index] = '';
-                } else {
-                  formModel.thenLogic[index] = value;
-                }
+                formModel.thenLogic[index] = value.toString();
+                // if (value.isEmpty) {
+                //   formModel.thenLogic[index] = '';
+                // } else {
+                //   formModel.thenLogic[index] = value;
+                // }
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
+                  /// At least one record is required
+                  /// it is possible not to fill the first but it's ok
                   if (index == 0) {
-                    /// show error for the first row (at least one is required)
                     return 'logic?';
                   }
                 }
@@ -151,7 +148,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
     return rows;
   }
 
-  /// For new record prefill user from app state
+  /// For new record prefill user from [AppState]
   void _userFromAppState(BuildContext context) {
     if (widget.dbKey == null) {
       final AppState appState = AppStateScope.of(context, rebuild: false);
@@ -205,7 +202,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                 },
                 onSaved: (value) {
                   if (value != null && value.isNotEmpty) {
-                    formModel.ifLogic = value;
+                    formModel.ifLogic = value.toString();
                   }
                 },
               ),
@@ -250,7 +247,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       },
                       onSaved: (value) {
                         if (value != null && value.isNotEmpty) {
-                          formModel.quote!.text = value;
+                          formModel.quote!.text = value.toString();
                         }
 
                         ///option to send model by model
@@ -300,7 +297,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.quote!.title = value;
+                          formModel.quote!.title = value.toString();
                         },
                       ),
                     ),
@@ -326,7 +323,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.quote!.year = value;
+                          formModel.quote!.year = value.toString();
                         },
                       ),
                     ),
@@ -352,7 +349,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.quote!.pages = value;
+                          formModel.quote!.pages = value.toString();
                         },
                       ),
                     ),
@@ -405,7 +402,8 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           return null;
                         },
                         onSaved: (value) {
-                          formModel.user!.firstName;
+                          /// TODO: user is null on edit
+                          formModel.user!.firstName = value.toString();
                         },
                       ),
                     ),
@@ -504,7 +502,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                 style: Theme.of(context).textTheme.caption,
               ),
 
-              /// clean, show example, preview
+              /// Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Row(
@@ -525,10 +523,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                     if (widget.dbKey == null)
                       ElevatedButton(
                         child: const Text(
-                          'clean',
-                          style: TextStyle(
-                              //color: Colors.white,
-                              ),
+                          'clear',
                         ),
                         onPressed: () {
                           setState(() {
@@ -541,48 +536,43 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                       ElevatedButton(
                         child: const Text(
                           'show example',
-                          style: TextStyle(
-                            color: Colors.lime,
-                          ),
                         ),
                         onPressed: () {
-                          previewNotifier.changeMyData(
-                              Poetic.fromJson(jsonDecode(beAllOneJson)));
+                          previewNotifier.changeMyData(Poetic.fromJson(jsonDecode(beAllOneJson)));
                         },
                       ),
                     ElevatedButton(
-                      onPressed: () async {
-                        /// todo
-                        /// preview and saving in one place doesn't make sense
-                        /// 2 step form or preview button
-                        previewNotifier.changeMyData(formModel);
-
+                      child: const Text(
+                        'preview',
+                        style: TextStyle(
+                          color: Colors.yellow,
+                        ),
+                      ),
+                      onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                          try {
-                            var key = await formModel.save(widget.dbKey);
-                            SinglePoetic.goHere(context,
-                                poetic: formModel, dbKey: key);
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Error occurred.')),
-                            );
-                          } finally {}
-
-                          //Navigator.pushNamed(
-                          //context, UserPoeticList.routeName);
+                          previewNotifier.changeMyData(formModel);
                         }
                       },
+                    ),
+                    ElevatedButton(
                       child: const Text(
                         'save',
                         style: TextStyle(
                           color: Colors.yellow,
                         ),
                       ),
-
-                      ///todo Preview should be here, on the same screen
-                      ///and save button right after it
-                      ///2 Wraps form
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          try {
+                            var key = await formModel.save(widget.dbKey);
+                            SinglePoetic.goHere(context, poetic: formModel, dbKey: key);
+                            //Navigator.pushNamed(context, UserPoeticList.routeName);
+                          } catch (e) {
+                            scMsg(context, 'Error occurred.');
+                          } finally {}
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -594,7 +584,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                 ///valueListenable: _defaultNotifier,
                 valueListenable: previewNotifier,
                 builder: (context, Poetic value, _) {
-                  return PoeticPreview(
+                  return PoeticView(
                     model: value,
                   );
                 },

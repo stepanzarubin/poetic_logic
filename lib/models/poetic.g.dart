@@ -23,8 +23,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 Quote _$QuoteFromJson(Map<String, dynamic> json) => Quote(
       text: json['text'] as String? ?? '',
       title: json['title'] as String? ?? '',
-      year: json['year'] as String?,
-      pages: json['pages'] as String?,
+      year: json['year'] as String? ?? '',
+      pages: json['pages'] as String? ?? '',
     );
 
 Map<String, dynamic> _$QuoteToJson(Quote instance) => <String, dynamic>{
@@ -62,6 +62,7 @@ Poetic _$PoeticFromJson(Map<String, dynamic> json) => Poetic(
       ..dbKey = json['dbKey']
       ..thenLogic =
           (json['thenLogic'] as List<dynamic>).map((e) => e as String).toList()
+      ..isPublished = json['isPublished'] as bool
       ..addedLogic = (json['addedLogic'] as List<dynamic>)
           .map((e) => AddedLogic.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -72,5 +73,6 @@ Map<String, dynamic> _$PoeticToJson(Poetic instance) => <String, dynamic>{
       'quote': instance.quote?.toJson(),
       'thenLogic': instance.thenLogic,
       'user': instance.user?.toJson(),
+      'isPublished': instance.isPublished,
       'addedLogic': instance.addedLogic.map((e) => e.toJson()).toList(),
     };

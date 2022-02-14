@@ -43,12 +43,11 @@ class AppStateWidget extends StatefulWidget {
 }
 
 class AppStateWidgetState extends State<AppStateWidget> {
-  /// works, but prefer using Map type directly
+  /// Works, but prefer using Map type directly
   /// after writing Man<String, dynamic> hive gives in return Man<dynamic, dynamic>
   /// which throws Exception
   /// .mapFrom
-  AppState _data = AppState.fromJson(
-      jsonDecode(jsonEncode(Hive.box(settingsDb).get(settingsKey))));
+  AppState _data = AppState.fromJson(jsonDecode(jsonEncode(Hive.box(settingsDb).get(settingsKey))));
 
   //AppState _data = AppState.fromJson(Hive.box(settingsDb).get(settingsKey));
 

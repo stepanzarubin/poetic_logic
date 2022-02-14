@@ -40,6 +40,7 @@ const beAllOneJson = '''{
     "mm": "11",
     "dd": "02"
   },
+  "isPublished": true,
   "addedLogic" : [
     {
       "thenLogic" : [

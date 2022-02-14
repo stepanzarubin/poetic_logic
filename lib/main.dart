@@ -9,23 +9,24 @@ import 'package:poetic_logic/screens/help.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
 import 'package:poetic_logic/screens/settings.dart';
 import 'package:poetic_logic/widgets/home_drawer.dart';
-import 'package:poetic_logic/widgets/poetic_preview.dart';
+import 'package:poetic_logic/widgets/poetic_view.dart';
 import 'package:poetic_logic/widgets/user_poetic_list.dart';
 
 import 'models/poetic.dart';
 
-Future<void> main() async {
+void main() async {
+  /// Init app
   await Hive.initFlutter();
   Box boxSettings = await Hive.openBox(settingsDb);
-  Box boxPoetics = await Hive.openBox(poeticDb);
-
+  await Hive.openBox(poeticDb);
   if (!boxSettings.containsKey(settingsKey)) {
     /// default settings
     await boxSettings.put(settingsKey, AppState().toJson());
 
-    /// poetic example
-    /// this is Json written
-    await boxPoetics.add(jsonDecode(beAllOneJson));
+    /// Fill db with poetic example
+    /// TODO: Json or Map, everywhere
+    var poetic = Poetic.fromJson(jsonDecode(beAllOneJson));
+    await poetic.save();
   }
 
   runApp(
@@ -45,21 +46,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    final double _fontSize = AppStateScope.of(context).fontSize;
-    //final double _fontSizeFactor = (_fontSize / Setting.fontSize);
-    //final double _fontSizeDelta = (_fontSize - Setting.fontSize).abs();
-
-    //MaterialApp materialApp;
-
     return MaterialApp(
       title: 'Poetic logic',
       theme: ThemeData(
         //scaffoldBackgroundColor: Colors.white70,
         useMaterial3: true,
-        colorSchemeSeed: Colors.grey,
-        // colorScheme: ColorScheme.fromSeed(
-        //   seedColor: Colors.grey,
-        // ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.grey,
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
           //contentPadding: EdgeInsets.symmetric(vertical: 2.5),
@@ -68,16 +62,10 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
 
-        /// control some fonts
-        // textTheme: TextTheme(
-        //   bodyText2: TextStyle(
-        //     fontSize: _fontSize,
-        //   ),
-        // ),
         /// control all fonts
         textTheme: Theme.of(context).textTheme.apply(
-              fontSizeFactor: (_fontSize / Setting.fontSize),
-              //fontSizeDelta: 2.0,
+              fontSizeFactor: (AppStateScope.of(context).fontSize / Setting.fontSize),
+              //fontSizeDelta: (_fontSize - Setting.fontSize).abs(),
             ),
 
         // elevatedButtonTheme: ElevatedButtonThemeData(
@@ -91,23 +79,12 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/': (context) => const PoeticHome(),
         QuickHome.routeName: (context) => const QuickHome(),
-        PoeticFormStatefulWidget.routeName: (context) =>
-            const PoeticFormStatefulWidget(),
+        PoeticFormStatefulWidget.routeName: (context) => const PoeticFormStatefulWidget(),
         UserPoeticList.routeName: (context) => const UserPoeticList(),
         Help.routeName: (context) => const Help(),
         Settings.routeName: (context) => const Settings(),
       },
     );
-
-    // return ValueListenableBuilder(
-    //   valueListenable: Hive.box(settingsDb).listenable(),
-    //   builder: (context, Box settingsBox, widget) {
-    //     var settings = settingsBox.get(settingsKey);
-    //     var appState = AppState.fromJson(settings);
-    //
-    //     return materialApp;
-    //   },
-    // );
   }
 }
 
@@ -131,38 +108,21 @@ class PoeticHome extends StatefulWidget {
 }
 
 class _PoeticHomeState extends State<PoeticHome> {
-  //late final Box<dynamic> hiveBox;
-  //late final Map<dynamic, dynamic> hiveRecords;
-
-  late final Poetic model;
-
-  @override
-  void initState() {
-    super.initState();
-
-    //hiveBox = Hive.box(poeticsBox);
-    //hiveRecords = hiveBox.toMap();
-
-    model = Poetic.fromJson(jsonDecode(beAllOneJson));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Poetic logic'),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: const Icon(Icons.add_box_outlined),
-        //     onPressed: () => Navigator.pushNamed(
-        //         context, PoeticFormStatefulWidget.routeName),
-        //   ),
-        //   IconButton(
-        //     icon: const Icon(Icons.list_alt),
-        //     onPressed: () =>
-        //         Navigator.pushNamed(context, UserPoeticList.routeName),
-        //   ),
-        // ],
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.add_box_outlined),
+            onPressed: () => Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
+          ),
+          IconButton(
+            icon: const Icon(Icons.list_alt),
+            onPressed: () => Navigator.pushNamed(context, UserPoeticList.routeName),
+          ),
+        ],
       ),
       drawer: const HomeDrawer(),
       body: SafeArea(
@@ -178,7 +138,6 @@ class _PoeticHomeState extends State<PoeticHome> {
                 Text(
                   'Logic is also poetic because can cure the same.',
                   textAlign: TextAlign.center,
-                  //fs 17
                   style: Theme.of(context).textTheme.subtitle1?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Colors.grey,
@@ -187,12 +146,19 @@ class _PoeticHomeState extends State<PoeticHome> {
                 Text(
                   'Example',
                   textAlign: TextAlign.center,
-                  //fs 18
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
-                PoeticPreview(
-                  model: model,
-                  addedDisplayLimit: 2,
+                Padding(
+                  padding: const EdgeInsets.only(top: 0, bottom: 0),
+                  child: PoeticView(
+                    model: Poetic.fromJson(jsonDecode(beAllOneJson)),
+                    addedDisplayLimit: 2,
+                  ),
+                ),
+                Text(
+                  'example end',
+                  style: Theme.of(context).textTheme.caption,
+                  textAlign: TextAlign.center,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 3),
@@ -210,30 +176,26 @@ class _PoeticHomeState extends State<PoeticHome> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // Flexible(
+                      //   child: ElevatedButton(
+                      //     child: const Text('More\n examples'),
+                      //     style: ElevatedButton.styleFrom(
+                      //       minimumSize: const Size(90, 60),
+                      //       maximumSize: const Size(180, 180),
+                      //     ),
+                      //     onPressed: () =>
+                      //         Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
+                      //   ),
+                      // ),
                       Flexible(
                         child: ElevatedButton(
-                          /// checking big font size, text should not go outsize
-                          /// the button, button should increase or font remain
-                          child: const Text('More\n examples'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(90, 60),
-                            maximumSize: const Size(180, 180),
-                            //shape: const CircleBorder(),
-                          ),
-                          onPressed: () => Navigator.pushNamed(
-                              context, PoeticFormStatefulWidget.routeName),
-                        ),
-                      ),
-                      Flexible(
-                        child: ElevatedButton(
-                          child: const Text('Add\n yours'),
+                          child: const Text('\u261A Add\n yours \u261B'),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(110, 80),
                             maximumSize: const Size(200, 200),
-                            //shape: const CircleBorder(),
                           ),
-                          onPressed: () => Navigator.pushNamed(
-                              context, PoeticFormStatefulWidget.routeName),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
                         ),
                       ),
                     ],

@@ -63,10 +63,10 @@ abstract class HasUser {
 class Quote {
   String text = '';
 
-  /// should be used for custom format, overriding (Title, year: pages)
-  String? title;
-  String? year;
-  String? pages;
+  /// Should be used for custom format, overriding (Title, year: pages)
+  String title = '';
+  String year = '';
+  String pages = '';
 
   /// Uri or something else
   ///String? source;
@@ -74,16 +74,13 @@ class Quote {
   Quote({
     this.text = '',
     this.title = '',
-    this.year,
-    this.pages,
+    this.year = '',
+    this.pages = '',
   });
 
-  Quote.quote(
-    this.text,
-    this.title,
-    this.year,
-    this.pages,
-  );
+  bool isEmpty() {
+    return text.isEmpty && title.isEmpty && year.isEmpty && pages.isEmpty;
+  }
 
   factory Quote.fromJson(Map<String, dynamic> json) => _$QuoteFromJson(json);
   Map<String, dynamic> toJson() => _$QuoteToJson(this);
@@ -109,8 +106,7 @@ class AddedLogic extends HasUser {
     }
   }
 
-  factory AddedLogic.fromJson(Map<String, dynamic> json) =>
-      _$AddedLogicFromJson(json);
+  factory AddedLogic.fromJson(Map<String, dynamic> json) => _$AddedLogicFromJson(json);
   Map<String, dynamic> toJson() => _$AddedLogicToJson(this);
 }
 
@@ -121,9 +117,13 @@ class Poetic extends HasUser {
   dynamic dbKey;
 
   String ifLogic = '';
-  Quote? quote = Quote(); //TODO: What is does if does not set the default?
+  Quote? quote = Quote();
+
+  /// TODO: Makes sense to use Set<String>
+  //Set<String> thenLogic = {};
   List<String> thenLogic = [];
   User? user;
+  bool isPublished = false;
   List<AddedLogic> addedLogic = [];
 
   Poetic({
@@ -151,27 +151,20 @@ class Poetic extends HasUser {
     return addedLogic.isNotEmpty;
   }
 
-  /// TODO: Added logic can be added only after publishing
-  /// after which original record become not editable, author can update
-  /// until somebody adds his first logic, and then add same as anybody else
-  bool isPublished() {
-    return hasAddedLogic();
-  }
-
   factory Poetic.fromJson(Map<String, dynamic> json) => _$PoeticFromJson(json);
   Map<String, dynamic> toJson() => _$PoeticToJson(this);
 
   /// Adds or updates record
-  Future<dynamic> save(dynamic dbK) async {
+  Future<dynamic> save([dynamic dbK]) async {
     var box = Hive.box(poeticDb);
 
-    /// remove empty strings
+    /// Remove empty strings
     thenLogic.removeWhere((element) => element.isEmpty);
     for (var added in addedLogic) {
       added.thenLogic.removeWhere((element) => element.isEmpty);
     }
 
-    /// do not record empty user
+    /// Do not record empty user
     if (user != null && user!.isEmpty()) {
       user = null;
     }

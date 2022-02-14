@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/common/app_state.dart';
+import 'package:poetic_logic/common/global.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -33,8 +34,7 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<void> _handleChangeFontSize(BuildContext context) async {
-    await AppStateWidget.of(context)
-        .updateFontSize(_appStateFormModel!.fontSize);
+    await AppStateWidget.of(context).updateFontSize(_appStateFormModel!.fontSize);
   }
 
   Future<void> _handleUpdateUser(
@@ -70,12 +70,6 @@ class _SettingsState extends State<Settings> {
     } else {
       return false;
     }
-  }
-
-  void scMsg(BuildContext context, msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg, textAlign: TextAlign.center)),
-    );
   }
 
   @override
@@ -203,8 +197,7 @@ class _SettingsState extends State<Settings> {
                               _appStateFormModel!.user!.firstName = value;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.firstName =
-                                  value.toString().trim();
+                              _appStateFormModel!.user!.firstName = value.toString().trim();
                             },
                           ),
                         ),
@@ -226,8 +219,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.lastName =
-                                  value.toString().trim();
+                              _appStateFormModel!.user!.lastName = value.toString().trim();
                             },
                           ),
                         ),
@@ -252,8 +244,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.mm =
-                                  value.toString().trim();
+                              _appStateFormModel!.user!.mm = value.toString().trim();
                             },
                           ),
                         ),
@@ -278,8 +269,7 @@ class _SettingsState extends State<Settings> {
                               return null;
                             },
                             onSaved: (value) {
-                              _appStateFormModel!.user!.dd =
-                                  value.toString().trim();
+                              _appStateFormModel!.user!.dd = value.toString().trim();
                             },
                           ),
                         ),

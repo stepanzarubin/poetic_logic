@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:poetic_logic/common/const.dart';
 import 'package:poetic_logic/models/poetic.dart';
 import 'package:poetic_logic/screens/form.dart';
-import 'package:poetic_logic/widgets/poetic_preview.dart';
+import 'package:poetic_logic/widgets/poetic_view.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class SinglePoetic extends StatefulWidget {
   const SinglePoetic({
@@ -46,7 +48,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
-            PoeticPreview(model: widget.poetic),
+            PoeticView(model: widget.poetic),
             if (!widget.poetic.hasAddedLogic())
               Form(
                 key: _formKey,
@@ -62,7 +64,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                           return null;
                         },
                         onSaved: (value) {
-                          thenLogic = value!;
+                          thenLogic = value.toString();
                         },
                       ),
                     ),
@@ -85,16 +87,34 @@ class _SinglePoeticState extends State<SinglePoetic> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                OutlinedButton(
                   child: const Text(
-                    'back',
+                    'delete',
+                    style: TextStyle(
+                      color: Colors.red,
+                      //backgroundColor: Colors.red,
+                    ),
                   ),
+                  onPressed: () async {
+                    await Hive.box(poeticDb).delete(widget.dbKey);
+                    Navigator.pushNamed(context, '/');
+                  },
                 ),
-                if (!widget.poetic.hasAddedLogic())
+                if (!widget.poetic.isPublished)
+                  const ElevatedButton(
+                    onPressed: null,
+                    child: Text(
+                      'publish',
+                      style: TextStyle(
+                        color: Colors.yellow,
+                      ),
+                    ),
+                  ),
+                if (!widget.poetic.isPublished)
                   ElevatedButton(
+                    child: const Text(
+                      'edit',
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -105,18 +125,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'edit',
-                    ),
-                  )
-                // publish
-                // else
-                //   const ElevatedButton(
-                //     onPressed: null,
-                //     child: Text(
-                //       'publish',
-                //     ),
-                //   )
+                  ),
               ],
             )
           ],

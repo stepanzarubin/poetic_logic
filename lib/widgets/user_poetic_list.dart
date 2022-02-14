@@ -16,10 +16,6 @@ class UserPoeticList extends StatefulWidget {
 }
 
 class _UserPoeticListState extends State<UserPoeticList> {
-  void _handleDelete(dbKey) {
-    Hive.box(poeticDb).delete(dbKey);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,14 +45,13 @@ class _UserPoeticListState extends State<UserPoeticList> {
               return Card(
                 child: ListTile(
                   onTap: () {
-                    SinglePoetic.goHere(context,
-                        poetic: poetic, dbKey: recordKey);
+                    SinglePoetic.goHere(context, poetic: poetic, dbKey: recordKey);
                   },
                   title: Text(poetic.ifLogic),
                   subtitle: Text(poetic.thenLogic[0]),
                   trailing: IconButton(
                     onPressed: () {
-                      _handleDelete(recordKey);
+                      Hive.box(poeticDb).delete(recordKey);
                     },
                     icon: const Icon(Icons.delete),
                   ),
@@ -68,8 +63,7 @@ class _UserPoeticListState extends State<UserPoeticList> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Text('Add'),
-        onPressed: () =>
-            Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
+        onPressed: () => Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
       ),
     );
   }

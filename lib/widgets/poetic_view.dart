@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:poetic_logic/models/poetic.dart';
 
-class PoeticPreview extends StatelessWidget {
-  const PoeticPreview({
+class PoeticView extends StatelessWidget {
+  const PoeticView({
     Key? key,
     required this.model,
     this.addedDisplayLimit = 0,
@@ -27,17 +27,18 @@ class PoeticPreview extends StatelessWidget {
           ),
         ),
         SelectableText(model.ifLogic),
-        const Text(
-          'Based on quote:',
-          style: TextStyle(
-            backgroundColor: Colors.grey,
-            fontWeight: FontWeight.bold,
+        if (model.quote != null && !model.quote!.isEmpty()) ...[
+          const Text(
+            'Referencing quote:',
+            style: TextStyle(
+              backgroundColor: Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        if (model.quote != null)
           QuoteWidget(
             model: model.quote!,
           ),
+        ],
         const Text(
           'Then:',
           style: TextStyle(
@@ -139,8 +140,7 @@ class AddedLogicList extends StatelessWidget {
       children: [
         for (var i = 0;
             i <
-                ((addedDisplayLimit != 0 &&
-                        addedDisplayLimit < addedLogic.length)
+                ((addedDisplayLimit != 0 && addedDisplayLimit < addedLogic.length)
                     ? addedDisplayLimit
                     : addedLogic.length);
             i++)
@@ -165,20 +165,11 @@ class AddedLogicWidget extends StatelessWidget {
     return SizedBox(
       width: 350,
       child: Container(
-        // constraints: const BoxConstraints(
-        //   minWidth: 350,
-        //   maxWidth: 350,
-        //   minHeight: 50,
-        //   maxHeight: 50,
-        // ),
-        //padding: const EdgeInsets.all(2.0),
-        //margin: const EdgeInsets.all(4.0),
-        //color: Colors.blueGrey.shade100,
         decoration: BoxDecoration(
           color: Colors.blueGrey.shade100,
-          // border: Border.all(
-          //   width: 0.1,
-          // ),
+          border: Border.all(
+            width: 0.05,
+          ),
           borderRadius: BorderRadius.circular(3),
         ),
         child: Column(
