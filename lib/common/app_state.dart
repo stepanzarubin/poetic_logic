@@ -77,11 +77,11 @@ class AppState extends HasUser {
   // }
 
   @override
-  String getSignature() {
+  String getSignature([bool short = false]) {
     if (user == null) {
       return User.oneOfPeople;
     } else {
-      return user!.getSignature();
+      return user!.getSignature(short);
     }
   }
 
@@ -92,15 +92,12 @@ class AppState extends HasUser {
 
   @override
   bool operator ==(Object other) {
-    return other is AppState &&
-        other.fontSize == fontSize &&
-        other.user == user;
+    return other is AppState && other.fontSize == fontSize && other.user == user;
   }
 
   @override
   int get hashCode => Object.hash(fontSize, user);
 
-  factory AppState.fromJson(Map<String, dynamic> json) =>
-      _$AppStateFromJson(json);
+  factory AppState.fromJson(Map<String, dynamic> json) => _$AppStateFromJson(json);
   Map<String, dynamic> toJson() => _$AppStateToJson(this);
 }

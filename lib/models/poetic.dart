@@ -29,9 +29,11 @@ class User {
     return firstName.isEmpty && lastName.isEmpty && mm.isEmpty && dd.isEmpty;
   }
 
-  String getSignature() {
+  String getSignature([bool short = false]) {
     if (isEmpty()) {
       return User.oneOfPeople;
+    } else if (short) {
+      return '$firstName ${lastName.substring(0, 1)}.';
     } else {
       return '$firstName $lastName, $mm/$dd';
     }

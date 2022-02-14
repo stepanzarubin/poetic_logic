@@ -36,7 +36,7 @@ class HomeDrawer extends StatelessWidget {
                       const Icon(Icons.account_box),
                       FittedBox(
                         child: Text(
-                          AppStateScope.of(context).getSignature(),
+                          AppStateScope.of(context).getSignature(true),
                           textAlign: TextAlign.center,
                         ),
                       ),
