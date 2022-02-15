@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:poetic_logic/common/app_state_scope.dart';
 import 'package:poetic_logic/common/const.dart';
 import 'package:poetic_logic/common/app_state.dart';
+import 'package:poetic_logic/common/global.dart';
 import 'package:poetic_logic/screens/form.dart';
 import 'package:poetic_logic/screens/help.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
@@ -41,12 +42,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  /// Sync data once on startup
-  DatabaseReference ref = FirebaseDatabase.instance.ref(publishedRemoteCollection);
-  DatabaseEvent event = await ref.once();
-  var json = event.snapshot.value as Map<dynamic, dynamic>;
-  if (json.isNotEmpty) {
-    publishedBox.putAll(json);
+  /// Sync data on startup
+  if (await isConnectivityConnected() && await hasNetwork()) {
+    DatabaseReference ref = FirebaseDatabase.instance.ref(publishedRemoteCollection);
+    DatabaseEvent event = await ref.once();
+    var json = event.snapshot.value as Map<dynamic, dynamic>;
+    if (json.isNotEmpty) {
+      publishedBox.putAll(json);
+    }
   }
 
   runApp(

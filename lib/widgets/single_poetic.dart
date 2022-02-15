@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:poetic_logic/common/const.dart';
+import 'package:poetic_logic/common/global.dart';
 import 'package:poetic_logic/models/poetic.dart';
 import 'package:poetic_logic/screens/form.dart';
 import 'package:poetic_logic/screens/quick_home.dart';
@@ -9,19 +13,21 @@ import 'package:hive_flutter/hive_flutter.dart';
 class SinglePoetic extends StatefulWidget {
   const SinglePoetic({
     Key? key,
-    required this.poetic,
-    this.dbKey,
+
+    ///TODO: get by dbKey, model is optional
+    //this.poetic,
+    required this.dbKey,
   }) : super(key: key);
 
-  final Poetic poetic;
+  //final Poetic? poetic;
   final dynamic dbKey;
 
-  static goHere(BuildContext context, {required Poetic poetic, dynamic dbKey}) {
+  static goHere(BuildContext context, {required dynamic dbKey, Poetic? poetic}) {
     return Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SinglePoetic(
-          poetic: poetic,
+          //poetic: poetic,
           dbKey: dbKey,
         ),
       ),
@@ -36,22 +42,37 @@ class _SinglePoeticState extends State<SinglePoetic> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String thenLogic = '';
 
+  late final Poetic poetic;
+
+  Future<bool>? isOnline;
+
+  @override
+  void initState() {
+    super.initState();
+
+    poetic = Poetic.fromJson(jsonDecode(jsonEncode(Hive.box(localDb).get(widget.dbKey))));
+
+    if (!poetic.isPublished) {
+      isOnline = isConnectivityConnected();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.poetic.ifLogic,
+          poetic.ifLogic,
           overflow: TextOverflow.ellipsis,
         ),
       ),
       body: Container(
         padding: const EdgeInsets.all(8.0),
-        color: widget.poetic.isPublished ? Colors.yellow : null,
+        color: poetic.isPublished ? Colors.yellow : null,
         child: ListView(
           children: [
-            PoeticView(model: widget.poetic),
-            if (!widget.poetic.hasAddedLogic())
+            PoeticView(model: poetic),
+            if (!poetic.hasAddedLogic())
               Form(
                 key: _formKey,
                 child: Row(
@@ -75,7 +96,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
 
-                          await widget.poetic.addLogic(thenLogic, widget.dbKey);
+                          await poetic.addLogic(thenLogic, widget.dbKey);
                           _formKey.currentState!.reset();
 
                           setState(() {});
@@ -102,15 +123,19 @@ class _SinglePoeticState extends State<SinglePoetic> {
                     Navigator.pushNamed(context, '/');
                   },
                 ),
-                if (!widget.poetic.isPublished)
+                if (!poetic.isPublished)
                   ElevatedButton(
                     onPressed: () async {
-                      //UserPoeticList
-                      var publisher = Publisher();
-                      await publisher.publish(widget.poetic);
-                      Navigator.pushNamed(context, QuickHome.routeName);
-                      //scMsg(context, err);
-                      setState(() {});
+                      if (!await isConnectivityConnected() || !await hasNetwork()) {
+                        scMsg(context, 'Please check internet connection');
+                        return;
+                      }
+
+                      if (await Publisher().publish(poetic)) {
+                        Navigator.pushNamed(context, QuickHome.routeName);
+                      } else {
+                        scMsg(context, 'Error: not published');
+                      }
                     },
                     child: const Text(
                       'publish',
@@ -119,7 +144,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                       ),
                     ),
                   ),
-                if (!widget.poetic.isPublished)
+                if (!poetic.isPublished)
                   ElevatedButton(
                     child: const Text(
                       'edit',
@@ -136,7 +161,7 @@ class _SinglePoeticState extends State<SinglePoetic> {
                     },
                   ),
               ],
-            )
+            ),
           ],
         ),
       ),

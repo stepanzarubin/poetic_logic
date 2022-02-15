@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:poetic_logic/common/const.dart';
+import 'package:poetic_logic/common/global.dart';
 part 'poetic.g.dart';
 
 @JsonSerializable()
@@ -160,8 +161,15 @@ class Poetic extends HasUser {
     return addedLogic.isNotEmpty;
   }
 
-  factory Poetic.fromJson(Map<String, dynamic> json) => _$PoeticFromJson(json);
-  Map<String, dynamic> toJson() => _$PoeticToJson(this);
+  /// TODO
+  static Future<Poetic> find(dynamic dbKey) async {
+    Map<dynamic, dynamic> m = Hive.box(localDb).get(dbKey);
+    var nm = m.map((k, e) => MapEntry(
+          k.toString(),
+          Map<String, dynamic>.from(e),
+        ));
+    return Poetic.fromJson(nm);
+  }
 
   /// Adds or updates record
   Future<dynamic> save([dynamic dbK]) async {
@@ -220,10 +228,17 @@ class Poetic extends HasUser {
       return e.toString();
     }
   }
+
+  factory Poetic.fromJson(Map<String, dynamic> json) => _$PoeticFromJson(json);
+  Map<String, dynamic> toJson() => _$PoeticToJson(this);
 }
 
 class Publisher {
   Future<dynamic> publish(Poetic model) async {
+    if (!await hasNetwork()) {
+      return false;
+    }
+
     if (model.isPublished) {
       throw Exception('Poetic ${model.ifLogic} already published.');
     }
@@ -234,16 +249,17 @@ class Publisher {
       model.isPublished = true;
       await _ref.push().set(model.toJson());
       //model.remoteId = ;
-      _moveToPublished(model);
+      await _moveToPublished(model);
+      return true;
     } on FirebaseException catch (e) {
       //print(e.message);
     }
   }
 
   /// Move to local published db and delete
-  _moveToPublished(Poetic model) {
+  Future<void> _moveToPublished(Poetic model) async {
     var box = Hive.box(publishedDb);
-    box.put(box.length, model.toJson());
-    Hive.box(localDb).delete(model.dbKey);
+    await box.put(box.length, model.toJson());
+    await Hive.box(localDb).delete(model.dbKey);
   }
 }

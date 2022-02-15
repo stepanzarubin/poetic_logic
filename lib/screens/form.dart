@@ -566,7 +566,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                           _formKey.currentState!.save();
                           try {
                             await formModel.save(widget.dbKey);
-                            SinglePoetic.goHere(context, poetic: formModel, dbKey: formModel.dbKey);
+                            SinglePoetic.goHere(context, dbKey: formModel.dbKey);
                             //Navigator.pushNamed(context, UserPoeticList.routeName);
                           } catch (e) {
                             scMsg(context, 'Error occurred.');
