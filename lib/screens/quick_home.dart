@@ -13,6 +13,8 @@ import 'package:poetic_logic/widgets/user_poetic_list.dart';
 ///   Hide example button on main screen
 ///   Quick form: if-then
 ///
+/// TODO: Show published
+///
 class QuickHome extends StatefulWidget {
   const QuickHome({Key? key}) : super(key: key);
 
@@ -27,50 +29,55 @@ class _QuickHomeState extends State<QuickHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Poetic logic')),
-      body: ListView(
-        children: [
-          Row(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView(
             children: [
-              // Expanded(
-              //   child: ElevatedButton(
-              //     child: const Text('My list'),
-              //     style: ElevatedButton.styleFrom(
-              //       minimumSize: const Size(90, 90),
-              //       maximumSize: const Size(180, 180),
-              //       shape: const CircleBorder(),
-              //     ),
-              //     onPressed: () =>
-              //         Navigator.pushNamed(context, UserPoeticList.routeName),
-              //   ),
-              // ),
-              // Expanded(
-              //   child: ElevatedButton(
-              //     child: const Text('Examples'),
-              //     style: ElevatedButton.styleFrom(
-              //       minimumSize: const Size(90, 90),
-              //       maximumSize: const Size(180, 180),
-              //       shape: const CircleBorder(),
-              //     ),
-              //     onPressed: () => Navigator.pushNamed(
-              //         context, PoeticFormStatefulWidget.routeName),
-              //   ),
-              // ),
-              Expanded(
-                child: ElevatedButton(
-                  child: const Text('Add\n yours'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(90, 90),
-                    maximumSize: const Size(180, 180),
-                    shape: const CircleBorder(),
+              Row(
+                children: [
+                  // Expanded(
+                  //   child: ElevatedButton(
+                  //     child: const Text('My list'),
+                  //     style: ElevatedButton.styleFrom(
+                  //       minimumSize: const Size(90, 90),
+                  //       maximumSize: const Size(180, 180),
+                  //       shape: const CircleBorder(),
+                  //     ),
+                  //     onPressed: () =>
+                  //         Navigator.pushNamed(context, UserPoeticList.routeName),
+                  //   ),
+                  // ),
+                  // Expanded(
+                  //   child: ElevatedButton(
+                  //     child: const Text('Examples'),
+                  //     style: ElevatedButton.styleFrom(
+                  //       minimumSize: const Size(90, 90),
+                  //       maximumSize: const Size(180, 180),
+                  //       shape: const CircleBorder(),
+                  //     ),
+                  //     onPressed: () => Navigator.pushNamed(
+                  //         context, PoeticFormStatefulWidget.routeName),
+                  //   ),
+                  // ),
+                  Expanded(
+                    child: ElevatedButton(
+                      child: const Text('Add\n yours'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(90, 90),
+                        maximumSize: const Size(180, 180),
+                        shape: const CircleBorder(),
+                      ),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, PoeticFormStatefulWidget.routeName),
+                    ),
                   ),
-                  onPressed: () => Navigator.pushNamed(
-                      context, PoeticFormStatefulWidget.routeName),
-                ),
+                ],
               ),
+              const UserPoeticList()
             ],
           ),
-          const UserPoeticList()
-        ],
+        ),
       ),
     );
   }

@@ -305,7 +305,7 @@ class _SettingsState extends State<Settings> {
                               await _handleResetToDefaults(context);
                               scMsg(context, 'Reset');
                             },
-                    )
+                    ),
                   ],
                 ),
               )

@@ -44,7 +44,7 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
 
     // on update
     if (widget.dbKey != null) {
-      var box = Hive.box(poeticDb);
+      var box = Hive.box(localDb);
       var record = box.get(widget.dbKey);
       if (record == null) {
         updateNotFoundScenario = true;
@@ -565,8 +565,8 @@ class _PoeticFormStatefulWidgetState extends State<PoeticFormStatefulWidget> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           try {
-                            var key = await formModel.save(widget.dbKey);
-                            SinglePoetic.goHere(context, poetic: formModel, dbKey: key);
+                            await formModel.save(widget.dbKey);
+                            SinglePoetic.goHere(context, poetic: formModel, dbKey: formModel.dbKey);
                             //Navigator.pushNamed(context, UserPoeticList.routeName);
                           } catch (e) {
                             scMsg(context, 'Error occurred.');

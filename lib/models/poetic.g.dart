@@ -60,6 +60,7 @@ Poetic _$PoeticFromJson(Map<String, dynamic> json) => Poetic(
           : User.fromJson(json['user'] as Map<String, dynamic>),
     )
       ..dbKey = json['dbKey']
+      ..remoteId = json['remoteId']
       ..thenLogic =
           (json['thenLogic'] as List<dynamic>).map((e) => e as String).toList()
       ..isPublished = json['isPublished'] as bool
@@ -69,6 +70,7 @@ Poetic _$PoeticFromJson(Map<String, dynamic> json) => Poetic(
 
 Map<String, dynamic> _$PoeticToJson(Poetic instance) => <String, dynamic>{
       'dbKey': instance.dbKey,
+      'remoteId': instance.remoteId,
       'ifLogic': instance.ifLogic,
       'quote': instance.quote?.toJson(),
       'thenLogic': instance.thenLogic,

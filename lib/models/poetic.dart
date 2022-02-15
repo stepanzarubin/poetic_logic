@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:poetic_logic/common/const.dart';
@@ -116,7 +118,12 @@ class AddedLogic extends HasUser {
 @JsonSerializable(explicitToJson: true)
 class Poetic extends HasUser {
   //@JsonKey(ignore: true)
+  /// Db key for local database
+  /// localId
   dynamic dbKey;
+
+  /// Db key for remote database
+  dynamic remoteId;
 
   String ifLogic = '';
   Quote? quote = Quote();
@@ -158,7 +165,9 @@ class Poetic extends HasUser {
 
   /// Adds or updates record
   Future<dynamic> save([dynamic dbK]) async {
-    var box = Hive.box(poeticDb);
+    var box = Hive.box(localDb);
+    // next index, hive stars with 0
+    dbKey = dbKey ?? (dbK ?? box.length);
 
     /// Remove empty strings
     thenLogic.removeWhere((element) => element.isEmpty);
@@ -171,20 +180,16 @@ class Poetic extends HasUser {
       user = null;
     }
 
-    if (dbK != null) {
-      // update
-      await box.put(dbK, toJson());
-      return dbK;
-    } else {
-      // create
-      return await box.add(toJson());
+    await box.put(dbKey, toJson());
+    //return await box.add(toJson());
 
-      /// Update record with dbKey/index (optionally)
-      /// Possible to go with indexes only
-      /// and for poetics this is applicable
-      /// index = key until key is not provided
-      //return await box.put(dbKey, toJson());
-    }
+    /// Update record with dbKey/index (optionally)
+    /// Possible to go with indexes only
+    /// and for poetics this is applicable
+    /// index = key until key is not provided
+    //return await box.put(dbKey, toJson());
+
+    return dbKey;
   }
 
   Future<dynamic> addLogic(String logic, [dynamic dbK]) async {
@@ -193,7 +198,7 @@ class Poetic extends HasUser {
     }
 
     try {
-      var box = Hive.box(poeticDb);
+      var box = Hive.box(localDb);
       thenLogic.add(logic);
       return await box.put(dbK ?? dbKey, toJson());
     } catch (e) {
@@ -208,11 +213,37 @@ class Poetic extends HasUser {
 
     try {
       if (thenLogic.remove(logic)) {
-        var box = Hive.box(poeticDb);
+        var box = Hive.box(localDb);
         return box.put(dbK ?? dbKey, toJson());
       }
     } catch (e) {
       return e.toString();
     }
+  }
+}
+
+class Publisher {
+  Future<dynamic> publish(Poetic model) async {
+    if (model.isPublished) {
+      throw Exception('Poetic ${model.ifLogic} already published.');
+    }
+
+    FirebaseDatabase database = FirebaseDatabase.instance;
+    DatabaseReference _ref = database.ref(publishedRemoteCollection);
+    try {
+      model.isPublished = true;
+      await _ref.push().set(model.toJson());
+      //model.remoteId = ;
+      _moveToPublished(model);
+    } on FirebaseException catch (e) {
+      //print(e.message);
+    }
+  }
+
+  /// Move to local published db and delete
+  _moveToPublished(Poetic model) {
+    var box = Hive.box(publishedDb);
+    box.put(box.length, model.toJson());
+    Hive.box(localDb).delete(model.dbKey);
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:poetic_logic/common/app_state_scope.dart';
@@ -13,12 +14,15 @@ import 'package:poetic_logic/widgets/poetic_view.dart';
 import 'package:poetic_logic/widgets/user_poetic_list.dart';
 
 import 'models/poetic.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   /// Init app
   await Hive.initFlutter();
   Box boxSettings = await Hive.openBox(settingsDb);
-  await Hive.openBox(poeticDb);
+  await Hive.openBox(localDb);
+  Box publishedBox = await Hive.openBox(publishedDb);
   if (!boxSettings.containsKey(settingsKey)) {
     /// default settings
     await boxSettings.put(settingsKey, AppState().toJson());
@@ -27,6 +31,22 @@ void main() async {
     /// TODO: Json or Map, everywhere
     var poetic = Poetic.fromJson(jsonDecode(beAllOneJson));
     await poetic.save();
+  }
+
+  /// TODO: Connect only on first load and on manual/auto sync
+  /// no need to check internet connection?
+  /// Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  /// Sync data once on startup
+  DatabaseReference ref = FirebaseDatabase.instance.ref(publishedRemoteCollection);
+  DatabaseEvent event = await ref.once();
+  var json = event.snapshot.value as Map<dynamic, dynamic>;
+  if (json.isNotEmpty) {
+    publishedBox.putAll(json);
   }
 
   runApp(

@@ -23,7 +23,7 @@ class _UserPoeticListState extends State<UserPoeticList> {
         title: const Text('My list'),
       ),
       body: ValueListenableBuilder<Box>(
-        valueListenable: Hive.box(poeticDb).listenable(),
+        valueListenable: Hive.box(localDb).listenable(),
         builder: (context, box, widget) {
           if (box.isEmpty) {
             return const Center(
@@ -31,6 +31,8 @@ class _UserPoeticListState extends State<UserPoeticList> {
             );
           }
 
+          /// TODO: How is read after deletion
+          /// rework
           return ListView.builder(
             padding: const EdgeInsets.all(8),
             itemCount: box.length,
@@ -43,6 +45,7 @@ class _UserPoeticListState extends State<UserPoeticList> {
               Poetic poetic = Poetic.fromJson(recordValue);
 
               return Card(
+                color: poetic.isPublished ? Colors.yellow : null,
                 child: ListTile(
                   onTap: () {
                     SinglePoetic.goHere(context, poetic: poetic, dbKey: recordKey);
@@ -51,7 +54,7 @@ class _UserPoeticListState extends State<UserPoeticList> {
                   subtitle: Text(poetic.thenLogic[0]),
                   trailing: IconButton(
                     onPressed: () {
-                      Hive.box(poeticDb).delete(recordKey);
+                      Hive.box(localDb).delete(recordKey);
                     },
                     icon: const Icon(Icons.delete),
                   ),

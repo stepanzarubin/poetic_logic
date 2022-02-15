@@ -24,6 +24,8 @@ class AppState extends HasUser {
   /// User as null only to avoid saving empty Maps and Json Maps and Json
   User? user;
 
+  //DateTime syncDate = DateTime.now().toUtc();
+
   AppState({
     this.fontSize = Setting.fontSize,
     this.user,

@@ -1,11 +1,9 @@
 /// Local database
-const poeticDb = 'poetic_logic_local_db';
+const localDb = 'poetic_logic_local_db';
+const publishedDb = 'poetic_logic_published_db';
 
-/// Database of published records
-/// can to be downloaded as a single file or fetched
-/// keep
-///   last saved index to be able to partially update
-const poeticPublishedDb = 'poetic_logic_published_db';
+/// Inside remote DB
+const publishedRemoteCollection = 'poetic_logic';
 
 const settingsDb = 'poetic_logic_settings_db';
 const settingsKey = 'settings';

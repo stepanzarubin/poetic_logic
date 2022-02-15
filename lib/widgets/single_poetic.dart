@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:poetic_logic/common/const.dart';
 import 'package:poetic_logic/models/poetic.dart';
 import 'package:poetic_logic/screens/form.dart';
+import 'package:poetic_logic/screens/quick_home.dart';
 import 'package:poetic_logic/widgets/poetic_view.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -44,8 +45,9 @@ class _SinglePoeticState extends State<SinglePoetic> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.all(8.0),
+        color: widget.poetic.isPublished ? Colors.yellow : null,
         child: ListView(
           children: [
             PoeticView(model: widget.poetic),
@@ -96,14 +98,21 @@ class _SinglePoeticState extends State<SinglePoetic> {
                     ),
                   ),
                   onPressed: () async {
-                    await Hive.box(poeticDb).delete(widget.dbKey);
+                    await Hive.box(localDb).delete(widget.dbKey);
                     Navigator.pushNamed(context, '/');
                   },
                 ),
                 if (!widget.poetic.isPublished)
-                  const ElevatedButton(
-                    onPressed: null,
-                    child: Text(
+                  ElevatedButton(
+                    onPressed: () async {
+                      //UserPoeticList
+                      var publisher = Publisher();
+                      await publisher.publish(widget.poetic);
+                      Navigator.pushNamed(context, QuickHome.routeName);
+                      //scMsg(context, err);
+                      setState(() {});
+                    },
+                    child: const Text(
                       'publish',
                       style: TextStyle(
                         color: Colors.yellow,
