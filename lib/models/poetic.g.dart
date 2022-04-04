@@ -35,34 +35,24 @@ Map<String, dynamic> _$QuoteToJson(Quote instance) => <String, dynamic>{
     };
 
 AddedLogic _$AddedLogicFromJson(Map<String, dynamic> json) => AddedLogic(
-      thenLogic: (json['thenLogic'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      user: json['user'] == null
-          ? null
-          : User.fromJson(json['user'] as Map<String, dynamic>),
+      thenLogic:
+          (json['thenLogic'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
+      user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$AddedLogicToJson(AddedLogic instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$AddedLogicToJson(AddedLogic instance) => <String, dynamic>{
       'thenLogic': instance.thenLogic,
       'user': instance.user?.toJson(),
     };
 
 Poetic _$PoeticFromJson(Map<String, dynamic> json) => Poetic(
       ifLogic: json['ifLogic'] as String? ?? '',
-      quote: json['quote'] == null
-          ? null
-          : Quote.fromJson(json['quote'] as Map<String, dynamic>),
-      user: json['user'] == null
-          ? null
-          : User.fromJson(json['user'] as Map<String, dynamic>),
+      quote: json['quote'] == null ? null : Quote.fromJson(json['quote'] as Map<String, dynamic>),
+      user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
     )
       ..dbKey = json['dbKey']
       ..remoteId = json['remoteId']
-      ..thenLogic =
-          (json['thenLogic'] as List<dynamic>).map((e) => e as String).toList()
+      ..thenLogic = (json['thenLogic'] as List<dynamic>).map((e) => e as String).toList()
       ..isPublished = json['isPublished'] as bool
       ..addedLogic = (json['addedLogic'] as List<dynamic>)
           .map((e) => AddedLogic.fromJson(e as Map<String, dynamic>))

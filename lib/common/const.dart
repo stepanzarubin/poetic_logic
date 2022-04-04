@@ -14,6 +14,7 @@ const messageTimeChanges =
 /// '28 There is neither Jew nor Gentile, neither slave nor free,
 /// nor is there male and female, for you are all one in Christ Jesus.'
 ///	(Holy Bible, 1973: Galatians 3:28)
+/// TODO: Examples, - are first published records.
 const beAllOneJson = '''{
   "ifLogic" : "All is One, as Christ taught.",
   "quote" : {
@@ -74,7 +75,8 @@ const beAllOneJson = '''{
       "thenLogic" : [
         "php is not worse then c++. And even more - php 3 is not worse then php 7.",
         "user never disconnected",
-        "I see this in international relations between countries."
+        "I see this in international relations between countries.",
+        "There is only one software program in the world"
       ],
       "user": null
     }
